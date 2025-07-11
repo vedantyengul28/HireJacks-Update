@@ -21,25 +21,29 @@ function ProfileCompletionCard() {
     const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
     useEffect(() => {
-        const storedProfile = localStorage.getItem('userProfile');
-        if (storedProfile) {
-            const profile = JSON.parse(storedProfile);
-            let filledFields = 0;
-            if (profile.data.firstName) filledFields++;
-            if (profile.data.lastName) filledFields++;
-            if (profile.data.email) filledFields++;
-            if (profile.data.headline) filledFields++;
-            if (profile.data.summary) filledFields++;
-            if (profile.resumeFile) filledFields++;
-            if (profile.profilePhoto) filledFields++;
+        try {
+            const storedProfile = localStorage.getItem('userProfile');
+            if (storedProfile) {
+                const profile = JSON.parse(storedProfile);
+                let filledFields = 0;
+                if (profile.data.firstName) filledFields++;
+                if (profile.data.lastName) filledFields++;
+                if (profile.data.email) filledFields++;
+                if (profile.data.headline) filledFields++;
+                if (profile.data.summary) filledFields++;
+                if (profile.resumeFile) filledFields++;
+                if (profile.profilePhoto) filledFields++;
 
-            const newCompletion = Math.round((filledFields / TOTAL_FIELDS) * 100);
-            setCompletion(newCompletion);
-            setMissingDetails(TOTAL_FIELDS - filledFields);
-            
-            if (profile.timestamp) {
-                setLastUpdated(formatDistanceToNow(new Date(profile.timestamp), { addSuffix: true }));
+                const newCompletion = Math.round((filledFields / TOTAL_FIELDS) * 100);
+                setCompletion(newCompletion);
+                setMissingDetails(TOTAL_FIELDS - filledFields);
+                
+                if (profile.timestamp) {
+                    setLastUpdated(formatDistanceToNow(new Date(profile.timestamp), { addSuffix: true }));
+                }
             }
+        } catch (error) {
+            console.error("Error accessing localStorage:", error);
         }
     }, []);
 
@@ -168,8 +172,9 @@ function AiJobFeed() {
         if (storedJobs) {
             setAllJobs(JSON.parse(storedJobs));
         } else {
-            setAllJobs(sampleJobs);
-            localStorage.setItem('allJobs', JSON.stringify(sampleJobs));
+            const initialJobs = sampleJobs;
+            setAllJobs(initialJobs);
+            localStorage.setItem('allJobs', JSON.stringify(initialJobs));
         }
 
         const storedAppliedJobs = localStorage.getItem('appliedJobs');
@@ -283,3 +288,5 @@ export default function JobSeekerPage() {
     </div>
   );
 }
+
+    

@@ -33,13 +33,18 @@ export default function RecruiterPage() {
 
   useEffect(() => {
     try {
-        const allJobs: Job[] = JSON.parse(localStorage.getItem('allJobs') || JSON.stringify(sampleJobs));
-        // For this example, we'll assume the recruiter posted all jobs. 
-        // In a real app, you'd filter by recruiter ID.
-        setPostedJobs(allJobs);
+        const allJobsString = localStorage.getItem('allJobs');
+        if (allJobsString) {
+            const allJobs: Job[] = JSON.parse(allJobsString);
+            setPostedJobs(allJobs);
+        } else {
+            const initialJobs = sampleJobs;
+            setPostedJobs(initialJobs);
+            localStorage.setItem('allJobs', JSON.stringify(initialJobs));
+        }
     } catch(e) {
-        console.error(e)
-        setPostedJobs(sampleJobs)
+        console.error(e);
+        setPostedJobs(sampleJobs);
     }
   }, []);
 
@@ -70,11 +75,11 @@ export default function RecruiterPage() {
     e.preventDefault();
     let allJobs: Job[] = [];
     try {
-       allJobs = JSON.parse(localStorage.getItem('allJobs') || '[]');
+       const storedJobs = localStorage.getItem('allJobs');
+       allJobs = storedJobs ? JSON.parse(storedJobs) : [];
     } catch (e) {
         console.error(e)
     }
-
 
     if (editingJob) {
         // Update existing job
@@ -113,7 +118,8 @@ export default function RecruiterPage() {
   const handleDeleteJob = (jobId: number) => {
      let allJobs: Job[] = [];
       try {
-        allJobs = JSON.parse(localStorage.getItem('allJobs') || '[]');
+        const storedJobs = localStorage.getItem('allJobs');
+        allJobs = storedJobs ? JSON.parse(storedJobs) : [];
       } catch(e) {
         console.error(e)
       }
@@ -227,3 +233,5 @@ export default function RecruiterPage() {
     </div>
   );
 }
+
+    
