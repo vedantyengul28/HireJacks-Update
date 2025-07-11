@@ -5,20 +5,41 @@ import { handleSuggestJobs } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { sampleJobs, type Job } from '@/lib/sample-data';
-import { ArrowUp, Briefcase, FileText, Link as LinkIcon, Loader2, MapPin, Sparkles } from 'lucide-react';
+import { ArrowUp, Briefcase, Loader2, MapPin } from 'lucide-react';
 import { useEffect, useState, useActionState, useTransition } from 'react';
 import Link from 'next/link';
+import { formatDistanceToNow } from 'date-fns';
+
+const TOTAL_FIELDS = 7; // firstName, lastName, email, headline, summary, resume, photo
 
 function ProfileCompletionCard() {
     const [completion, setCompletion] = useState(0);
+    const [missingDetails, setMissingDetails] = useState(TOTAL_FIELDS);
+    const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
     useEffect(() => {
-        // Simulate fetching profile completion
-        const timer = setTimeout(() => setCompletion(73), 500);
-        return () => clearTimeout(timer);
+        const storedProfile = localStorage.getItem('userProfile');
+        if (storedProfile) {
+            const profile = JSON.parse(storedProfile);
+            let filledFields = 0;
+            if (profile.data.firstName) filledFields++;
+            if (profile.data.lastName) filledFields++;
+            if (profile.data.email) filledFields++;
+            if (profile.data.headline) filledFields++;
+            if (profile.data.summary) filledFields++;
+            if (profile.resumeFile) filledFields++;
+            if (profile.profilePhoto) filledFields++;
+
+            const newCompletion = Math.round((filledFields / TOTAL_FIELDS) * 100);
+            setCompletion(newCompletion);
+            setMissingDetails(TOTAL_FIELDS - filledFields);
+            
+            if (profile.timestamp) {
+                setLastUpdated(formatDistanceToNow(new Date(profile.timestamp), { addSuffix: true }));
+            }
+        }
     }, []);
 
     return (
@@ -53,8 +74,14 @@ function ProfileCompletionCard() {
                         </div>
                         <div>
                             <p className="font-semibold">Your Profile</p>
-                            <p className="text-xs text-muted-foreground">Updated 34d ago</p>
-                            <Link href="/job-seeker/profile" className="text-sm text-primary font-medium">5 missing details</Link>
+                            <p className="text-xs text-muted-foreground">
+                                {lastUpdated ? `Updated ${lastUpdated}` : 'Not updated yet'}
+                            </p>
+                             {missingDetails > 0 && (
+                                <Link href="/job-seeker/profile" className="text-sm text-primary font-medium">
+                                    {missingDetails} missing detail{missingDetails > 1 ? 's' : ''}
+                                </Link>
+                             )}
                         </div>
                     </div>
                      <div className="flex flex-col items-center justify-center text-center">
@@ -131,7 +158,7 @@ function AiJobFeed() {
   }, [submitted, formAction, profileSummary]);
 
   const pending = isPending || (submitted && !state.jobs?.length && !state.message.startsWith('No'));
-  const suggestedJobs = sampleJobs.filter(job => state.jobs?.some(suggestion => job.title.includes(suggestion.split(' ')[1])));
+  const suggestedJobs = sampleJobs.filter(job => state.jobs?.some(suggestion => job.title.includes(suggestion.split(' ')[1] || '')));
 
 
   return (

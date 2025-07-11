@@ -22,7 +22,7 @@ interface ProfileData {
 
 export default function ProfilePage() {
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
   
   const [profileData, setProfileData] = useState<ProfileData>({
     firstName: '',
@@ -32,10 +32,25 @@ export default function ProfilePage() {
     summary: '',
   });
   
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
+  const [resumeFile, setResumeFile] = useState<{ name: string } | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState<{ name: string } | null>(null);
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Load data from localStorage on component mount
+    const storedProfile = localStorage.getItem('userProfile');
+    if (storedProfile) {
+      const { data, resumeFile, profilePhoto, photoPreview } = JSON.parse(storedProfile);
+      setProfileData(data);
+      if (resumeFile) setResumeFile(resumeFile);
+      if (profilePhoto) setProfilePhoto(profilePhoto);
+      if (photoPreview) setProfilePhotoPreview(photoPreview);
+    } else {
+      // If no profile, start in editing mode
+      setIsEditing(true);
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -44,32 +59,37 @@ export default function ProfilePage() {
 
   const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setResumeFile(e.target.files[0]);
+      setResumeFile({ name: e.target.files[0].name });
     }
   };
 
   const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      setProfilePhoto(file);
-      if (profilePhotoPreview) {
-          URL.revokeObjectURL(profilePhotoPreview);
-      }
-      setProfilePhotoPreview(URL.createObjectURL(file));
+      setProfilePhoto({ name: file.name });
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        setProfilePhotoPreview(dataUrl);
+      };
+      reader.readAsDataURL(file);
     }
   };
-  
-  useEffect(() => {
-    // Clean up the object URL to avoid memory leaks
-    return () => {
-      if (profilePhotoPreview) {
-        URL.revokeObjectURL(profilePhotoPreview);
-      }
-    };
-  }, [profilePhotoPreview]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Save to localStorage
+    const profileToStore = {
+      data: profileData,
+      resumeFile: resumeFile,
+      profilePhoto: profilePhoto,
+      photoPreview: profilePhotoPreview,
+      timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('userProfile', JSON.stringify(profileToStore));
+
     setIsEditing(false);
     toast({
       title: "Profile Saved!",
@@ -200,9 +220,7 @@ export default function ProfilePage() {
                         <span className="sr-only">Remove file</span>
                       </Button>
                     ) : (
-                       <Button variant="outline" size="sm" asChild>
-                           <a href={URL.createObjectURL(resumeFile)} download={resumeFile.name}>Download</a>
-                       </Button>
+                       <p className="text-sm text-muted-foreground">Uploaded</p>
                     )}
                   </div>
                 )}
