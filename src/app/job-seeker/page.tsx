@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { sampleJobs, type Job } from '@/lib/sample-data';
-import { ArrowUp, Briefcase, Loader2, MapPin } from 'lucide-react';
+import { ArrowUp, Briefcase, Loader2, MapPin, Bookmark } from 'lucide-react';
 import { useEffect, useState, useActionState, useTransition } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 const TOTAL_FIELDS = 7; // firstName, lastName, email, headline, summary, resume, photo
 
@@ -108,7 +109,16 @@ function ProfileCompletionCard() {
     );
 }
 
-function JobCard({ job }: { job: Job }) {
+function JobCard({ job, onSave }: { job: Job; onSave: (job: Job) => void; }) {
+  const { toast } = useToast();
+
+  const handleApply = () => {
+    toast({
+        title: "Application Sent!",
+        description: `You successfully applied for the ${job.title} position at ${job.company}.`
+    });
+  }
+
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
@@ -130,7 +140,13 @@ function JobCard({ job }: { job: Job }) {
         </div>
         <div className="flex justify-between items-center">
              <p className="text-sm font-semibold">{job.salary}</p>
-            <Button size="sm">Apply Now</Button>
+             <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => onSave(job)}>
+                    <Bookmark className="h-4 w-4" />
+                    <span className="sr-only">Save Job</span>
+                </Button>
+                <Button size="sm" onClick={handleApply}>Apply Now</Button>
+            </div>
         </div>
       </CardContent>
     </Card>
@@ -141,12 +157,11 @@ function AiJobFeed() {
   const [isPending, startTransition] = useTransition();
   const [state, formAction] = useActionState(handleSuggestJobs, { message: '', jobs: [] });
   const [submitted, setSubmitted] = useState(false);
+  const { toast } = useToast();
 
-  // Example profile summary. In a real app, this would come from the user's saved profile.
   const profileSummary = "Experienced frontend developer proficient in React, TypeScript, and Next.js. Passionate about building accessible user interfaces and working with modern web technologies. Skilled in state management with Redux and Zustand, and building design systems with Tailwind CSS.";
 
   useEffect(() => {
-    // Automatically submit the form on component mount if not already submitted
     if (!submitted) {
         const formData = new FormData();
         formData.append('profile', profileSummary);
@@ -157,8 +172,26 @@ function AiJobFeed() {
     }
   }, [submitted, formAction, profileSummary]);
 
+  const handleSaveJob = (jobToSave: Job) => {
+    const savedJobs: Job[] = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    const isAlreadySaved = savedJobs.some(job => job.id === jobToSave.id);
+    if (!isAlreadySaved) {
+        localStorage.setItem('savedJobs', JSON.stringify([...savedJobs, jobToSave]));
+        toast({
+            title: "Job Saved!",
+            description: `${jobToSave.title} at ${jobToSave.company} has been saved.`
+        });
+    } else {
+        toast({
+            variant: "default",
+            title: "Already Saved",
+            description: `This job is already in your saved list.`
+        });
+    }
+  };
+
   const pending = isPending || (submitted && !state.jobs?.length && !state.message.startsWith('No'));
-  const suggestedJobs = sampleJobs.filter(job => state.jobs?.some(suggestion => job.title.includes(suggestion.split(' ')[1] || '')));
+  const suggestedJobs = sampleJobs.filter(job => state.jobs?.some(suggestion => job.title.toLowerCase().includes(suggestion.toLowerCase().split(' ')[1] || '')));
 
 
   return (
@@ -180,7 +213,7 @@ function AiJobFeed() {
       {!pending && suggestedJobs.length > 0 && (
         <div className="space-y-4">
           {suggestedJobs.map(job => (
-            <JobCard key={job.id} job={job} />
+            <JobCard key={job.id} job={job} onSave={handleSaveJob} />
           ))}
         </div>
       )}

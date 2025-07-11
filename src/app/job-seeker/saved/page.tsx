@@ -1,23 +1,107 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Star, MapPin, Trash2 } from 'lucide-react';
+import { type Job } from '@/lib/sample-data';
+import { useToast } from '@/hooks/use-toast';
+
+function SavedJobCard({ job, onRemove }: { job: Job, onRemove: (jobId: number) => void }) {
+  const { toast } = useToast();
+  
+  const handleApply = () => {
+    toast({
+        title: "Application Sent!",
+        description: `You successfully applied for the ${job.title} position at ${job.company}.`
+    });
+  };
+
+  return (
+    <Card className="hover:shadow-lg transition-shadow">
+      <CardHeader>
+        <div className="flex justify-between items-start">
+            <div>
+                 <CardTitle className="text-lg">{job.title}</CardTitle>
+                <CardDescription className="font-medium text-primary">{job.company}</CardDescription>
+            </div>
+            <Badge variant={job.type === 'Full-time' ? 'default' : 'secondary'}>{job.type}</Badge>
+        </div>
+        <div className="flex items-center text-sm text-muted-foreground pt-2">
+          <MapPin className="h-4 w-4 mr-2" />
+          <span>{job.location}</span>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-2 mb-4">
+            {job.skills.map(skill => <Badge variant="outline" key={skill}>{skill}</Badge>)}
+        </div>
+        <div className="flex justify-between items-center">
+             <p className="text-sm font-semibold">{job.salary}</p>
+             <div className='flex items-center gap-2'>
+                <Button variant="ghost" size="icon" className="text-destructive" onClick={() => onRemove(job.id)}>
+                    <Trash2 className="h-5 w-5" />
+                    <span className="sr-only">Remove Job</span>
+                </Button>
+                <Button size="sm" onClick={handleApply}>Apply Now</Button>
+             </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 
 export default function SavedJobsPage() {
+  const [savedJobs, setSavedJobs] = useState<Job[]>([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const jobsFromStorage = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    setSavedJobs(jobsFromStorage);
+  }, []);
+
+  const handleRemoveJob = (jobId: number) => {
+    const updatedJobs = savedJobs.filter(job => job.id !== jobId);
+    setSavedJobs(updatedJobs);
+    localStorage.setItem('savedJobs', JSON.stringify(updatedJobs));
+    toast({
+        variant: "destructive",
+        title: "Job Removed",
+        description: "The job has been removed from your saved list."
+    });
+  }
+
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      <Card className="max-w-2xl mx-auto">
+      <Card className="max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold tracking-tight">Saved Jobs</CardTitle>
-          <CardDescription>
-            The jobs you save will appear here.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-center">
-            <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg">
-                <Star className="w-12 h-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Saved Jobs Yet</h3>
-                <p className="text-muted-foreground">Start searching and save jobs you're interested in.</p>
+          <div className='flex items-center gap-4'>
+            <Star className="h-8 w-8 text-primary" />
+            <div>
+                <CardTitle className="text-2xl font-bold tracking-tight">Saved Jobs</CardTitle>
+                <CardDescription>
+                    The jobs you save will appear here. Found {savedJobs.length} job{savedJobs.length !== 1 && 's'}.
+                </CardDescription>
             </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+            {savedJobs.length > 0 ? (
+                <div className="space-y-4">
+                    {savedJobs.map(job => (
+                        <SavedJobCard key={job.id} job={job} onRemove={handleRemoveJob}/>
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center py-16">
+                    <Star className="w-16 h-16 text-muted-foreground mb-4 mx-auto" />
+                    <h3 className="text-xl font-semibold mb-2">No Saved Jobs Yet</h3>
+                    <p className="text-muted-foreground">Start searching and save jobs you're interested in.</p>
+                </div>
+            )}
         </CardContent>
       </Card>
     </div>

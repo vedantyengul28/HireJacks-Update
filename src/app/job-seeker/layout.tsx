@@ -19,8 +19,8 @@ interface ProfileInfo {
 const mobileNavItems = [
     { href: '/job-seeker', icon: Home, label: 'Home' },
     { href: '/job-seeker/apply', icon: Briefcase, label: 'Apply' },
+    { href: '/job-seeker/saved', icon: Bookmark, label: 'Saved' },
     { href: '/job-seeker/profile', icon: User, label: 'Profile' },
-    { href: '/job-seeker/notifications', icon: Bell, label: 'Updates' },
 ];
 
 const sidebarNavItems = [
@@ -110,10 +110,10 @@ export default function JobSeekerLayout({
                         </Button>
                     </SheetTrigger>
                     <SheetContent side="left" className="p-0 w-[280px]">
-                        <SheetHeader>
-                            <SheetTitle className="sr-only">Menu</SheetTitle>
-                        </SheetHeader>
-                        <SidebarContent />
+                       <SheetHeader>
+                         <SheetTitle className="sr-only">Menu</SheetTitle>
+                       </SheetHeader>
+                       <SidebarContent />
                     </SheetContent>
                 </Sheet>
               </div>

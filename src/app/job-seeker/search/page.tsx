@@ -5,11 +5,21 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Briefcase, MapPin, Search as SearchIcon, Code } from 'lucide-react';
+import { Briefcase, MapPin, Search as SearchIcon, Code, Bookmark } from 'lucide-react';
 import { sampleJobs, type Job } from '@/lib/sample-data';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
-function JobCard({ job }: { job: Job }) {
+function JobCard({ job, onSave }: { job: Job; onSave: (job: Job) => void; }) {
+  const { toast } = useToast();
+
+  const handleApply = () => {
+    toast({
+        title: "Application Sent!",
+        description: `You successfully applied for the ${job.title} position at ${job.company}.`
+    });
+  }
+
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
@@ -32,7 +42,13 @@ function JobCard({ job }: { job: Job }) {
         </div>
         <div className="flex justify-between items-center">
              <p className="text-sm font-semibold">{job.salary}</p>
-            <Button size="sm">Apply Now</Button>
+             <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => onSave(job)}>
+                    <Bookmark className="h-4 w-4" />
+                    <span className="sr-only">Save Job</span>
+                </Button>
+                <Button size="sm" onClick={handleApply}>Apply Now</Button>
+            </div>
         </div>
       </CardContent>
     </Card>
@@ -41,6 +57,7 @@ function JobCard({ job }: { job: Job }) {
 
 
 export default function JobSearchPage() {
+  const { toast } = useToast();
   const [filters, setFilters] = useState({
     keyword: '',
     location: '',
@@ -75,6 +92,24 @@ export default function JobSearchPage() {
     });
 
     setFilteredJobs(results);
+  };
+  
+  const handleSaveJob = (jobToSave: Job) => {
+    const savedJobs: Job[] = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    const isAlreadySaved = savedJobs.some(job => job.id === jobToSave.id);
+    if (!isAlreadySaved) {
+        localStorage.setItem('savedJobs', JSON.stringify([...savedJobs, jobToSave]));
+        toast({
+            title: "Job Saved!",
+            description: `${jobToSave.title} at ${jobToSave.company} has been saved.`
+        });
+    } else {
+        toast({
+            variant: "default",
+            title: "Already Saved",
+            description: `This job is already in your saved list.`
+        });
+    }
   };
 
   return (
@@ -121,7 +156,7 @@ export default function JobSearchPage() {
         </h2>
         {filteredJobs.length > 0 ? (
           filteredJobs.map(job => (
-            <JobCard key={job.id} job={job} />
+            <JobCard key={job.id} job={job} onSave={handleSaveJob} />
           ))
         ) : (
           <div className="text-center py-16">
