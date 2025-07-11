@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Briefcase, ChevronDown, ChevronUp, User, FileText, Mail, Phone,Linkedin } from 'lucide-react';
+import { Users, Briefcase, ChevronDown, ChevronUp, User, FileText, Mail, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,7 +13,6 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Job } from '@/lib/sample-data';
 
@@ -158,14 +157,15 @@ export default function RecruiterApplicantsPage() {
                 <div>
                    <DialogTitle className="text-2xl font-bold">{selectedApplicant.data.firstName} {selectedApplicant.data.lastName}</DialogTitle>
                    <DialogDescription className="text-base">{selectedApplicant.data.headline}</DialogDescription>
-                   <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                   <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1.5"><Mail className="w-4 h-4"/> {selectedApplicant.data.email}</div>
+                        <a href="#" className="flex items-center gap-1.5 text-primary hover:underline"><Linkedin className="w-4 h-4"/> LinkedIn Profile</a>
                    </div>
                 </div>
               </div>
             </DialogHeader>
             <Separator className="my-4" />
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
                 <div>
                     <h4 className="font-semibold mb-2">Professional Summary</h4>
                     <p className="text-sm text-foreground whitespace-pre-wrap">{selectedApplicant.data.summary || "No summary provided."}</p>

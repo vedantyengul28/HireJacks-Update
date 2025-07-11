@@ -1,16 +1,17 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useActionState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { UploadCloud, User, FileText, X, Camera, Edit, Check } from 'lucide-react';
+import { UploadCloud, User, FileText, X, Camera, Edit, Check, Sparkles, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { generateSummary } from './actions';
 
 interface ProfileData {
   firstName: string;
@@ -23,6 +24,8 @@ interface ProfileData {
 export default function ProfilePage() {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [state, formAction] = useActionState(generateSummary, { summary: '' });
   
   const [profileData, setProfileData] = useState<ProfileData>({
     firstName: '',
@@ -38,7 +41,6 @@ export default function ProfilePage() {
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Load data from localStorage on component mount
     const storedProfile = localStorage.getItem('userProfile');
     if (storedProfile) {
       const { data, resumeFile, profilePhoto, photoPreview } = JSON.parse(storedProfile);
@@ -47,10 +49,19 @@ export default function ProfilePage() {
       if (profilePhoto) setProfilePhoto(profilePhoto);
       if (photoPreview) setProfilePhotoPreview(photoPreview);
     } else {
-      // If no profile, start in editing mode
       setIsEditing(true);
     }
   }, []);
+  
+  useEffect(() => {
+    if (state.summary) {
+        setProfileData(prev => ({ ...prev, summary: state.summary }));
+        toast({
+            title: "Summary Generated!",
+            description: "Your AI-powered summary has been added.",
+        });
+    }
+  }, [state.summary, toast]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -79,8 +90,6 @@ export default function ProfilePage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Save to localStorage
     const profileToStore = {
       data: profileData,
       resumeFile: resumeFile,
@@ -89,13 +98,20 @@ export default function ProfilePage() {
       timestamp: new Date().toISOString()
     };
     localStorage.setItem('userProfile', JSON.stringify(profileToStore));
-
     setIsEditing(false);
     toast({
       title: "Profile Saved!",
       description: "Your information has been updated successfully.",
     });
   };
+  
+  const handleGenerateSummary = () => {
+    const formData = new FormData();
+    formData.append('profile', JSON.stringify(profileData));
+    startTransition(() => {
+        formAction(formData);
+    });
+  }
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -184,7 +200,15 @@ export default function ProfilePage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="summary">Professional Summary</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="summary">Professional Summary</Label>
+                {isEditing && (
+                  <Button type="button" variant="outline" size="sm" onClick={handleGenerateSummary} disabled={isPending}>
+                     {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                     AI Generate
+                  </Button>
+                )}
+              </div>
               {isEditing ? (
                 <Textarea id="summary" placeholder="Tell us about your skills, experience, and career goals." rows={5} value={profileData.summary} onChange={handleInputChange} />
               ) : (

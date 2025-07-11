@@ -8,8 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Briefcase, MapPin, Check, Bookmark } from 'lucide-react';
 import { sampleJobs, type Job } from '@/lib/sample-data';
 import { useToast } from '@/hooks/use-toast';
+import type { Notification } from '../notifications/page';
 
-function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; }) {
+function JobCard({ job, onSave, onApply, isApplied, isSaved }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; isSaved: boolean; }) {
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
@@ -34,7 +35,7 @@ function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: 
           <p className="text-sm font-semibold">{job.salary}</p>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => onSave(job)}>
-              <Bookmark className="h-4 w-4" />
+              <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
               <span className="sr-only">Save Job</span>
             </Button>
             {isApplied ? (
@@ -56,16 +57,22 @@ export default function ApplyJobsPage() {
   const { toast } = useToast();
   const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
+  const [savedJobs, setSavedJobs] = useState<number[]>([]);
 
   useEffect(() => {
     try {
       const storedJobs = localStorage.getItem('allJobs');
       const jobs = storedJobs ? JSON.parse(storedJobs) : sampleJobs;
-      setAllJobs(jobs.slice().reverse()); // Show newest first
+      setAllJobs(jobs.slice().reverse());
 
       const storedAppliedJobs = localStorage.getItem('appliedJobs');
       if (storedAppliedJobs) {
         setAppliedJobs(JSON.parse(storedAppliedJobs));
+      }
+
+      const storedSavedJobs = localStorage.getItem('savedJobs');
+      if (storedSavedJobs) {
+        setSavedJobs(JSON.parse(storedSavedJobs).map((j: Job) => j.id));
       }
     } catch (error) {
       console.error("Error accessing localStorage:", error);
@@ -74,20 +81,43 @@ export default function ApplyJobsPage() {
   }, []);
 
   const handleSaveJob = (jobToSave: Job) => {
-    const savedJobs: Job[] = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-    const isAlreadySaved = savedJobs.some(job => job.id === jobToSave.id);
-    if (!isAlreadySaved) {
-      localStorage.setItem('savedJobs', JSON.stringify([...savedJobs, jobToSave]));
+    const currentSavedJobs: Job[] = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    const isAlreadySaved = currentSavedJobs.some(job => job.id === jobToSave.id);
+    
+    let updatedSavedJobs;
+
+    if (isAlreadySaved) {
+      updatedSavedJobs = currentSavedJobs.filter(job => job.id !== jobToSave.id);
+      toast({
+        variant: "destructive",
+        title: "Job Unsaved",
+        description: `${jobToSave.title} at ${jobToSave.company} has been removed from your list.`
+      });
+    } else {
+      updatedSavedJobs = [...currentSavedJobs, jobToSave];
       toast({
         title: "Job Saved!",
         description: `${jobToSave.title} at ${jobToSave.company} has been saved.`
       });
-    } else {
-      toast({
-        variant: "default",
-        title: "Already Saved",
-        description: `This job is already in your saved list.`
-      });
+    }
+    
+    localStorage.setItem('savedJobs', JSON.stringify(updatedSavedJobs));
+    setSavedJobs(updatedSavedJobs.map(j => j.id));
+  };
+  
+  const addNotification = (newNotification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+    try {
+        const existingNotifications: Notification[] = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const notification: Notification = {
+            ...newNotification,
+            id: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
+            read: false,
+        };
+        const updatedNotifications = [...existingNotifications, notification];
+        localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+    } catch (error) {
+        console.error("Failed to add notification:", error);
     }
   };
 
@@ -112,6 +142,10 @@ export default function ApplyJobsPage() {
         title: "Application Sent!",
         description: `You successfully applied for the ${job.title} position at ${job.company}.`
       });
+       addNotification({
+        title: "Application Sent!",
+        description: `You successfully applied for the ${job.title} position at ${job.company}.`
+       });
     }
   };
 
@@ -127,7 +161,7 @@ export default function ApplyJobsPage() {
         <CardContent className="space-y-6">
           {allJobs.length > 0 ? (
             allJobs.map(job => (
-              <JobCard key={job.id} job={job} onSave={handleSaveJob} onApply={handleApply} isApplied={appliedJobs.includes(job.id)} />
+              <JobCard key={job.id} job={job} onSave={handleSaveJob} onApply={handleApply} isApplied={appliedJobs.includes(job.id)} isSaved={savedJobs.includes(job.id)} />
             ))
           ) : (
             <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg text-center">

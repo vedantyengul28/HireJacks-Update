@@ -1,20 +1,25 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Briefcase, Trash2, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { sampleJobs, type Job } from '@/lib/sample-data';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 export default function RecruiterPage() {
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
+  const [postedJobs, setPostedJobs] = useState<Job[]>([]);
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
+
   const [jobDetails, setJobDetails] = useState({
     title: '',
     company: '',
@@ -25,6 +30,13 @@ export default function RecruiterPage() {
     skills: '',
   });
 
+  useEffect(() => {
+    const allJobs: Job[] = JSON.parse(localStorage.getItem('allJobs') || JSON.stringify(sampleJobs));
+    // For this example, we'll assume the recruiter posted all jobs. 
+    // In a real app, you'd filter by recruiter ID.
+    setPostedJobs(allJobs);
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setJobDetails(prev => ({ ...prev, [id]: value }));
@@ -34,30 +46,7 @@ export default function RecruiterPage() {
     setJobDetails(prev => ({ ...prev, type: value }));
   };
 
-  const handlePostJob = (e: React.FormEvent) => {
-    e.preventDefault();
-    const allJobs: Job[] = JSON.parse(localStorage.getItem('allJobs') || JSON.stringify(sampleJobs));
-    
-    const newJob: Job = {
-      id: allJobs.length + 1,
-      title: jobDetails.title,
-      company: jobDetails.company,
-      location: jobDetails.location,
-      type: jobDetails.type,
-      description: jobDetails.description,
-      skills: jobDetails.skills.split(',').map(s => s.trim()),
-      salary: jobDetails.salary,
-    };
-
-    const updatedJobs = [...allJobs, newJob];
-    localStorage.setItem('allJobs', JSON.stringify(updatedJobs));
-
-    toast({
-      title: 'Job Posted Successfully!',
-      description: `${newJob.title} at ${newJob.company} is now live.`,
-    });
-
-    // Reset form and hide it
+  const resetForm = () => {
     setJobDetails({
         title: '',
         company: '',
@@ -67,8 +56,55 @@ export default function RecruiterPage() {
         description: '',
         skills: '',
     });
+    setEditingJob(null);
     setShowForm(false);
+  }
+
+  const handlePostJob = (e: React.FormEvent) => {
+    e.preventDefault();
+    let allJobs: Job[] = JSON.parse(localStorage.getItem('allJobs') || '[]');
+
+    if (editingJob) {
+        // Update existing job
+        const updatedJob = {
+            ...editingJob,
+            ...jobDetails,
+            skills: jobDetails.skills.split(',').map(s => s.trim()),
+        };
+        allJobs = allJobs.map(job => job.id === editingJob.id ? updatedJob : job);
+        toast({ title: 'Job Updated!', description: 'Your job posting has been successfully updated.' });
+    } else {
+        // Create new job
+        const newJob: Job = {
+            id: allJobs.length > 0 ? Math.max(...allJobs.map(j => j.id)) + 1 : 1,
+            ...jobDetails,
+            skills: jobDetails.skills.split(',').map(s => s.trim()),
+        };
+        allJobs.push(newJob);
+        toast({ title: 'Job Posted!', description: `${newJob.title} at ${newJob.company} is now live.` });
+    }
+
+    localStorage.setItem('allJobs', JSON.stringify(allJobs));
+    setPostedJobs(allJobs);
+    resetForm();
   };
+
+  const handleEditJob = (job: Job) => {
+    setEditingJob(job);
+    setJobDetails({
+        ...job,
+        skills: job.skills.join(', '),
+    });
+    setShowForm(true);
+  };
+  
+  const handleDeleteJob = (jobId: number) => {
+     let allJobs: Job[] = JSON.parse(localStorage.getItem('allJobs') || '[]');
+     allJobs = allJobs.filter(job => job.id !== jobId);
+     localStorage.setItem('allJobs', JSON.stringify(allJobs));
+     setPostedJobs(allJobs);
+     toast({ variant: 'destructive', title: 'Job Deleted', description: 'The job posting has been removed.' });
+  }
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -84,6 +120,7 @@ export default function RecruiterPage() {
         <CardContent>
           {showForm ? (
             <form onSubmit={handlePostJob} className="space-y-4">
+               <h3 className="text-lg font-semibold">{editingJob ? 'Edit Job Posting' : 'Create New Job Posting'}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Job Title</Label>
@@ -126,18 +163,45 @@ export default function RecruiterPage() {
                     <Textarea id="description" value={jobDetails.description} onChange={handleInputChange} placeholder="Describe the role and responsibilities..." rows={5} required />
                </div>
                <div className="flex gap-2 justify-end">
-                    <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>Cancel</Button>
-                    <Button type="submit">Post Job</Button>
+                    <Button type="button" variant="ghost" onClick={resetForm}>Cancel</Button>
+                    <Button type="submit">{editingJob ? 'Update Job' : 'Post Job'}</Button>
                </div>
             </form>
           ) : (
-            <div className="text-center p-8 border-2 border-dashed rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">Create a New Job Posting</h3>
-              <p className="text-muted-foreground mb-4">You can post a new job to attract candidates.</p>
-              <Button onClick={() => setShowForm(true)}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Post a Job
-              </Button>
+             <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Your Job Postings ({postedJobs.length})</h3>
+                    <Button onClick={() => setShowForm(true)}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Post a New Job
+                    </Button>
+                </div>
+                {postedJobs.length > 0 ? (
+                    <div className="space-y-4">
+                        {postedJobs.slice().reverse().map(job => (
+                            <Card key={job.id} className="p-4">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <h4 className="font-semibold">{job.title}</h4>
+                                        <p className="text-sm text-muted-foreground">{job.company} - {job.location}</p>
+                                    </div>
+                                    <Badge variant={job.type === 'Full-time' ? 'default' : 'secondary'}>{job.type}</Badge>
+                                </div>
+                                <Separator className="my-3"/>
+                                <div className="flex justify-end gap-2">
+                                     <Button variant="outline" size="sm" onClick={() => handleEditJob(job)}><Edit className="mr-2 h-3 w-3"/> Edit</Button>
+                                     <Button variant="destructive" size="sm" onClick={() => handleDeleteJob(job.id)}><Trash2 className="mr-2 h-3 w-3"/> Delete</Button>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center p-8 border-2 border-dashed rounded-lg">
+                        <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">No Jobs Posted Yet</h3>
+                        <p className="text-muted-foreground mb-4">Post a job to attract candidates.</p>
+                    </div>
+                )}
             </div>
           )}
         </CardContent>
@@ -145,5 +209,3 @@ export default function RecruiterPage() {
     </div>
   );
 }
-
-    

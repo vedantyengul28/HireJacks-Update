@@ -1,108 +1,86 @@
 
-
 'use client';
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
   ArrowRight,
-  User,
-  Search,
-  MessageSquare,
   Briefcase,
-  Eye,
-  BookOpen,
-  HelpCircle,
-  Mail,
-  Info,
   Menu,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import Image from 'next/image';
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Separator } from '@/components/ui/separator';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 
 const sidebarLinks = [
-  { icon: Search, label: 'Search jobs', href: '/job-seeker/search' },
-  { icon: MessageSquare, label: 'Chat for help', href: '#' },
-  { icon: Eye, label: 'Display preferences', href: '#' },
-  { icon: BookOpen, label: 'HireJacks blog', href: '#' },
-  { icon: HelpCircle, label: 'How HireJacks works', href: '#' },
-  { icon: Mail, label: 'Write to us', href: '#' },
-  { icon: Info, label: 'About us', href: '#' },
+  { href: '/roles', label: 'Get Started' },
+  { href: '/job-seeker/search', label: 'Search Jobs' },
+  { href: '#', label: 'How HireJacks Works' },
+  { href: '#', label: 'About Us' },
 ];
 
-function Sidebar() {
+function MobileSidebar() {
   return (
-    <div className="flex h-full flex-col bg-card text-card-foreground">
-      <SheetHeader className="p-4 text-left">
-        <SheetTitle>Menu</SheetTitle>
-        <div className="flex items-center gap-4">
-          <div className="rounded-full border p-2">
-            <User className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold">Build your profile</h2>
-            <p className="text-sm text-muted-foreground">
-              Job opportunities are waiting for you.
-            </p>
-          </div>
-        </div>
-      </SheetHeader>
-      <div className="p-4">
-        <Link href="/roles">
-          <Button className="w-full bg-accent hover:bg-accent/90">
-            Get Started
-          </Button>
+    <Sidebar>
+      <SidebarHeader>
+        <Link href="/" className="flex items-center gap-2 font-bold text-primary">
+            <Briefcase className="h-6 w-6" />
+            <span className="text-xl">HireJacks</span>
         </Link>
-      </div>
-      <Separator />
-      <nav className="flex-1 space-y-2 p-4">
-        {sidebarLinks.map((item) => (
-          <Link
-            key={item.label}
-            href={item.href}
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
-          >
-            <item.icon className="h-5 w-5" />
-            <span>{item.label}</span>
-          </Link>
-        ))}
-      </nav>
-      <Separator />
-      <div className="p-4 text-center text-sm text-muted-foreground">
-        <p>Version 1.0.0</p>
-      </div>
-    </div>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarMenu>
+          {sidebarLinks.map((item) => (
+            <SidebarMenuItem key={item.label}>
+              <Link href={item.href} className="w-full">
+                <SidebarMenuButton className="w-full justify-start">
+                  {item.label}
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarContent>
+    </Sidebar>
   );
 }
 
 export default function IntroductionPage() {
   return (
     <SidebarProvider>
-      <div className="flex min-h-dvh flex-col bg-background">
+      <div className="flex min-h-dvh flex-col bg-background dark:bg-slate-950">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold text-primary">
               <Briefcase className="h-6 w-6" />
               <span className="text-xl">HireJacks</span>
           </Link>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="md:hidden">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="p-0">
-              <Sidebar />
-            </SheetContent>
-          </Sheet>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => {
+              const html = document.documentElement;
+              html.classList.toggle('dark');
+            }}>
+              <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="md:hidden">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Toggle Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="p-0">
+                <MobileSidebar />
+              </SheetContent>
+            </Sheet>
+          </div>
         </header>
         <main className="flex flex-1 items-center justify-center p-4 text-center">
           <div className="flex flex-col items-center justify-center space-y-8 max-w-4xl mx-auto">
