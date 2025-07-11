@@ -158,8 +158,17 @@ function AiJobFeed() {
   const [submitted, setSubmitted] = useState(false);
   const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
   const { toast } = useToast();
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
 
   const profileSummary = "Experienced frontend developer proficient in React, TypeScript, and Next.js. Passionate about building accessible user interfaces and working with modern web technologies. Skilled in state management with Redux and Zustand, and building design systems with Tailwind CSS.";
+
+  useEffect(() => {
+      const storedJobs = localStorage.getItem('allJobs');
+      setAllJobs(storedJobs ? JSON.parse(storedJobs) : sampleJobs);
+
+      const storedAppliedJobs = localStorage.getItem('appliedJobs');
+      setAppliedJobs(storedAppliedJobs ? JSON.parse(storedAppliedJobs) : []);
+  }, []);
 
   useEffect(() => {
     if (!submitted) {
@@ -170,8 +179,6 @@ function AiJobFeed() {
         });
         setSubmitted(true);
     }
-    const storedAppliedJobs = JSON.parse(localStorage.getItem('appliedJobs') || '[]');
-    setAppliedJobs(storedAppliedJobs);
   }, [submitted, formAction, profileSummary]);
 
   const handleSaveJob = (jobToSave: Job) => {
@@ -196,7 +203,7 @@ function AiJobFeed() {
     const updatedAppliedJobs = [...appliedJobs, jobId];
     setAppliedJobs(updatedAppliedJobs);
     localStorage.setItem('appliedJobs', JSON.stringify(updatedAppliedJobs));
-    const job = sampleJobs.find(j => j.id === jobId);
+    const job = allJobs.find(j => j.id === jobId);
     if (job) {
         toast({
             title: "Application Sent!",
@@ -206,8 +213,8 @@ function AiJobFeed() {
   };
   
   const pending = isPending || (submitted && !state.jobs?.length && !state.message.startsWith('No'));
-  const allJobs = sampleJobs.slice().reverse();
-  const suggestedJobs = allJobs.filter(job => state.jobs?.some(suggestion => job.title.toLowerCase().includes(suggestion.toLowerCase().split(' ')[1] || '')));
+  const jobsToDisplay = allJobs.slice().reverse();
+  const suggestedJobs = jobsToDisplay.filter(job => state.jobs?.some(suggestion => job.title.toLowerCase().includes(suggestion.toLowerCase().split(' ').slice(0, 2).join(' ') || '')));
 
 
   return (
@@ -252,5 +259,3 @@ export default function JobSeekerPage() {
     </div>
   );
 }
-
-    

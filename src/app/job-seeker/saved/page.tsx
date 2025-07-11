@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Trash2, Check } from 'lucide-react';
-import { type Job, sampleJobs } from '@/lib/sample-data';
+import { type Job } from '@/lib/sample-data';
 import { useToast } from '@/hooks/use-toast';
 
 function SavedJobCard({ job, onRemove, onApply, isApplied }: { job: Job, onRemove: (jobId: number) => void, onApply: (jobId: number) => void, isApplied: boolean }) {
@@ -59,10 +59,14 @@ export default function SavedJobsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const jobsFromStorage = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-    setSavedJobs(jobsFromStorage);
-    const appliedFromStorage = JSON.parse(localStorage.getItem('appliedJobs') || '[]');
-    setAppliedJobs(appliedFromStorage);
+    const jobsFromStorage = localStorage.getItem('savedJobs');
+    if (jobsFromStorage) {
+      setSavedJobs(JSON.parse(jobsFromStorage));
+    }
+    const appliedFromStorage = localStorage.getItem('appliedJobs');
+    if (appliedFromStorage) {
+      setAppliedJobs(JSON.parse(appliedFromStorage));
+    }
   }, []);
 
   const handleRemoveJob = (jobId: number) => {
@@ -122,5 +126,3 @@ export default function SavedJobsPage() {
     </div>
   );
 }
-
-    

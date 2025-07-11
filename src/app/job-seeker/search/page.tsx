@@ -62,15 +62,20 @@ export default function JobSearchPage() {
     location: '',
     skills: '',
   });
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
 
   useEffect(() => {
-    // Load jobs and applied status from localStorage on mount
-    const allJobs = JSON.parse(localStorage.getItem('allJobs') || JSON.stringify(sampleJobs));
-    setFilteredJobs(allJobs.slice().reverse()); // Show newest first
-    const storedAppliedJobs = JSON.parse(localStorage.getItem('appliedJobs') || '[]');
-    setAppliedJobs(storedAppliedJobs);
+    const storedJobs = localStorage.getItem('allJobs');
+    const jobs = storedJobs ? JSON.parse(storedJobs) : sampleJobs;
+    setAllJobs(jobs);
+    setFilteredJobs(jobs.slice().reverse()); // Show newest first
+    
+    const storedAppliedJobs = localStorage.getItem('appliedJobs');
+    if (storedAppliedJobs) {
+      setAppliedJobs(JSON.parse(storedAppliedJobs));
+    }
   }, []);
   
 
@@ -81,7 +86,6 @@ export default function JobSearchPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const allJobs = JSON.parse(localStorage.getItem('allJobs') || JSON.stringify(sampleJobs));
     const lowercasedKeyword = filters.keyword.toLowerCase();
     const lowercasedLocation = filters.location.toLowerCase();
     const lowercasedSkills = filters.skills.toLowerCase().split(',').map(s => s.trim()).filter(s => s);
@@ -191,5 +195,3 @@ export default function JobSearchPage() {
     </div>
   );
 }
-
-    

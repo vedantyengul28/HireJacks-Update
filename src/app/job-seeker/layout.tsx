@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Briefcase, User, Bell, Bot, Bookmark, Settings, MessageSquare, Menu } from 'lucide-react';
+import { Home, Briefcase, User, Bookmark, Settings, MessageSquare, Menu, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
