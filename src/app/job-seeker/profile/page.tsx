@@ -1,23 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { UploadCloud, User, FileText, X } from 'lucide-react';
+import { UploadCloud, User, FileText, X, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function ProfilePage() {
   const { toast } = useToast();
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setResumeFile(e.target.files[0]);
     }
   };
+
+  const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setProfilePhoto(file);
+      setProfilePhotoPreview(URL.createObjectURL(file));
+    }
+  };
+  
+  useEffect(() => {
+    // Clean up the object URL to avoid memory leaks
+    return () => {
+      if (profilePhotoPreview) {
+        URL.revokeObjectURL(profilePhotoPreview);
+      }
+    };
+  }, [profilePhotoPreview]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +62,32 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSave} className="space-y-6">
+            <div className="flex justify-center">
+                <div className="relative group">
+                    <Avatar className="h-32 w-32 cursor-pointer" onClick={() => photoInputRef.current?.click()}>
+                        <AvatarImage src={profilePhotoPreview || undefined} alt="Profile Photo" />
+                        <AvatarFallback>
+                            <span className="text-4xl">
+                                <User />
+                            </span>
+                        </AvatarFallback>
+                    </Avatar>
+                    <div 
+                        className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                        onClick={() => photoInputRef.current?.click()}
+                    >
+                        <Camera className="h-8 w-8 text-white" />
+                    </div>
+                </div>
+                <Input 
+                    type="file" 
+                    ref={photoInputRef} 
+                    className="hidden" 
+                    accept="image/png, image/jpeg"
+                    onChange={handlePhotoFileChange} 
+                />
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
@@ -73,7 +120,7 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                                 <p className="text-xs text-muted-foreground">PDF, DOC, DOCX (MAX. 5MB)</p>
                             </div>
-                            <Input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} />
+                            <Input id="dropzone-file" type="file" className="hidden" onChange={handleResumeFileChange} />
                         </Label>
                     </div> 
                 ) : (
