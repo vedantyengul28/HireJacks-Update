@@ -1,45 +1,22 @@
 import Link from 'next/link';
-import { Briefcase, UserSearch } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
 
-export default function RoleSelectionPage() {
+export default function IntroductionPage() {
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center bg-background p-4 sm:p-6">
-      <div className="text-center mb-12">
-        <h1 className="font-bold text-4xl sm:text-5xl text-primary tracking-tight">
+    <main className="flex min-h-dvh flex-col items-center justify-center bg-background p-4 sm:p-6 text-center">
+      <div className="flex flex-col items-center justify-center space-y-8">
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-primary tracking-tight">
           Welcome to HireJacks
         </h1>
-        <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-          Your next career move or top talent is just a click away.
-          Choose your role to get started.
+        <p className="max-w-2xl text-lg sm:text-xl text-muted-foreground">
+          The seamless platform to connect skilled professionals with innovative companies. Your next opportunity is just a click away.
         </p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
-        <Link href="/job-seeker">
-          <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-primary/50">
-            <CardHeader className="flex flex-col items-center justify-center text-center p-8">
-              <div className="p-4 bg-primary/10 rounded-full mb-4">
-                <Briefcase className="h-12 w-12 text-primary" />
-              </div>
-              <CardTitle className="text-2xl font-semibold">Job Seeker</CardTitle>
-              <CardDescription className="mt-2 text-base">
-                Find jobs, get AI-powered suggestions, and build your career.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
-        <Link href="/recruiter">
-          <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-accent/50">
-            <CardHeader className="flex flex-col items-center justify-center text-center p-8">
-              <div className="p-4 bg-accent/10 rounded-full mb-4">
-                <UserSearch className="h-12 w-12 text-accent" />
-              </div>
-              <CardTitle className="text-2xl font-semibold">Recruiter</CardTitle>
-              <CardDescription className="mt-2 text-base">
-                Post jobs, manage applicants, and find the perfect candidate.
-              </CardDescription>
-            </CardHeader>
-          </Card>
+        <Link href="/roles">
+          <Button size="lg" className="group transform transition-transform duration-300 hover:scale-105">
+            Get Started
+            <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+          </Button>
         </Link>
       </div>
     </main>
