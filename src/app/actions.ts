@@ -1,3 +1,4 @@
+
 'use server';
 
 import { suggestRelevantJobs, type SuggestRelevantJobsOutput } from '@/ai/flows/suggest-relevant-jobs';
@@ -5,7 +6,6 @@ import { z } from 'zod';
 
 const FormSchema = z.object({
   profile: z.string().min(20, { message: "Profile summary must be at least 20 characters." }),
-  searchHistory: z.string().min(3, { message: "Search history must be at least 3 characters." }),
 });
 
 export type FormState = {
@@ -27,23 +27,21 @@ export async function handleSuggestJobs(
       message: 'Please correct the errors below.',
       issues: [
         ...(fieldErrors.profile || []),
-        ...(fieldErrors.searchHistory || []),
       ]
     };
   }
 
-  const { profile, searchHistory } = validatedFields.data;
+  const { profile } = validatedFields.data;
 
   try {
     const result: SuggestRelevantJobsOutput = await suggestRelevantJobs({
-      profile,
-      searchHistory,
+      profile
     });
     
     if (result.jobSuggestions && result.jobSuggestions.length > 0) {
         return { message: 'Success! Here are your tailored job suggestions.', jobs: result.jobSuggestions };
     } else {
-        return { message: 'No job suggestions found. Try refining your profile and search history.' };
+        return { message: 'No job suggestions found. Try refining your profile.' };
     }
 
   } catch (error) {
