@@ -7,8 +7,6 @@ import {
   ArrowRight,
   Briefcase,
   Menu,
-  Moon,
-  Sun,
 } from 'lucide-react';
 import Image from 'next/image';
 import {
@@ -54,21 +52,13 @@ function MobileSidebar() {
 export default function IntroductionPage() {
   return (
     <SidebarProvider>
-      <div className="flex min-h-dvh flex-col bg-background dark:bg-slate-950">
+      <div className="flex min-h-dvh flex-col bg-background">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold text-primary">
               <Briefcase className="h-6 w-6" />
               <span className="text-xl">HireJacks</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => {
-              const html = document.documentElement;
-              html.classList.toggle('dark');
-            }}>
-              <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon" className="md:hidden">
