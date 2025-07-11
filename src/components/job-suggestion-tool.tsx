@@ -1,7 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
-import { useEffect } from 'react';
+import { useFormStatus } from 'react-dom';
+import { useEffect, useActionState } from 'react';
 import { handleSuggestJobs, type FormState } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,7 +32,7 @@ function SubmitButton() {
 
 export default function JobSuggestionTool() {
   const initialState: FormState = { message: '', jobs: [] };
-  const [state, formAction] = useFormState(handleSuggestJobs, initialState);
+  const [state, formAction] = useActionState(handleSuggestJobs, initialState);
   const { toast } = useToast();
 
   useEffect(() => {
