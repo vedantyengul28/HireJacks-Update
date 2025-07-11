@@ -15,6 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Job } from '@/lib/sample-data';
+import BackButton from '@/components/ui/back-button';
 
 interface Application {
   jobId: number;
@@ -67,6 +68,7 @@ export default function RecruiterApplicantsPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+       <BackButton />
        <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <div className="flex items-center gap-4">

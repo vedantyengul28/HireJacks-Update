@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { sampleJobs, type Job } from '@/lib/sample-data';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import BackButton from '@/components/ui/back-button';
 
 export default function RecruiterPage() {
   const { toast } = useToast();
@@ -31,10 +32,15 @@ export default function RecruiterPage() {
   });
 
   useEffect(() => {
-    const allJobs: Job[] = JSON.parse(localStorage.getItem('allJobs') || JSON.stringify(sampleJobs));
-    // For this example, we'll assume the recruiter posted all jobs. 
-    // In a real app, you'd filter by recruiter ID.
-    setPostedJobs(allJobs);
+    try {
+        const allJobs: Job[] = JSON.parse(localStorage.getItem('allJobs') || JSON.stringify(sampleJobs));
+        // For this example, we'll assume the recruiter posted all jobs. 
+        // In a real app, you'd filter by recruiter ID.
+        setPostedJobs(allJobs);
+    } catch(e) {
+        console.error(e)
+        setPostedJobs(sampleJobs)
+    }
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -62,7 +68,13 @@ export default function RecruiterPage() {
 
   const handlePostJob = (e: React.FormEvent) => {
     e.preventDefault();
-    let allJobs: Job[] = JSON.parse(localStorage.getItem('allJobs') || '[]');
+    let allJobs: Job[] = [];
+    try {
+       allJobs = JSON.parse(localStorage.getItem('allJobs') || '[]');
+    } catch (e) {
+        console.error(e)
+    }
+
 
     if (editingJob) {
         // Update existing job
@@ -99,7 +111,12 @@ export default function RecruiterPage() {
   };
   
   const handleDeleteJob = (jobId: number) => {
-     let allJobs: Job[] = JSON.parse(localStorage.getItem('allJobs') || '[]');
+     let allJobs: Job[] = [];
+      try {
+        allJobs = JSON.parse(localStorage.getItem('allJobs') || '[]');
+      } catch(e) {
+        console.error(e)
+      }
      allJobs = allJobs.filter(job => job.id !== jobId);
      localStorage.setItem('allJobs', JSON.stringify(allJobs));
      setPostedJobs(allJobs);
@@ -108,6 +125,7 @@ export default function RecruiterPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <BackButton />
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl font-bold tracking-tight">

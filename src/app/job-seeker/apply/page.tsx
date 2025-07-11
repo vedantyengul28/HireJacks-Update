@@ -9,6 +9,7 @@ import { Briefcase, MapPin, Check, Bookmark } from 'lucide-react';
 import { sampleJobs, type Job } from '@/lib/sample-data';
 import { useToast } from '@/hooks/use-toast';
 import type { Notification } from '../notifications/page';
+import BackButton from '@/components/ui/back-button';
 
 function JobCard({ job, onSave, onApply, isApplied, isSaved }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; isSaved: boolean; }) {
   return (
@@ -81,7 +82,12 @@ export default function ApplyJobsPage() {
   }, []);
 
   const handleSaveJob = (jobToSave: Job) => {
-    const currentSavedJobs: Job[] = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    let currentSavedJobs: Job[] = [];
+    try {
+      currentSavedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    } catch (e) {
+      console.error(e)
+    }
     const isAlreadySaved = currentSavedJobs.some(job => job.id === jobToSave.id);
     
     let updatedSavedJobs;
@@ -151,6 +157,7 @@ export default function ApplyJobsPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <BackButton />
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl font-bold tracking-tight">Apply for Jobs</CardTitle>

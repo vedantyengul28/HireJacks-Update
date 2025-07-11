@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { generateSummary } from './actions';
+import BackButton from '@/components/ui/back-button';
 
 interface ProfileData {
   firstName: string;
@@ -41,15 +42,20 @@ export default function ProfilePage() {
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const storedProfile = localStorage.getItem('userProfile');
-    if (storedProfile) {
-      const { data, resumeFile, profilePhoto, photoPreview } = JSON.parse(storedProfile);
-      setProfileData(data);
-      if (resumeFile) setResumeFile(resumeFile);
-      if (profilePhoto) setProfilePhoto(profilePhoto);
-      if (photoPreview) setProfilePhotoPreview(photoPreview);
-    } else {
-      setIsEditing(true);
+    try {
+        const storedProfile = localStorage.getItem('userProfile');
+        if (storedProfile) {
+          const { data, resumeFile, profilePhoto, photoPreview } = JSON.parse(storedProfile);
+          setProfileData(data);
+          if (resumeFile) setResumeFile(resumeFile);
+          if (profilePhoto) setProfilePhoto(profilePhoto);
+          if (photoPreview) setProfilePhotoPreview(photoPreview);
+        } else {
+          setIsEditing(true);
+        }
+    } catch(e) {
+        console.error(e)
+        setIsEditing(true);
     }
   }, []);
   
@@ -90,19 +96,28 @@ export default function ProfilePage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const profileToStore = {
-      data: profileData,
-      resumeFile: resumeFile,
-      profilePhoto: profilePhoto,
-      photoPreview: profilePhotoPreview,
-      timestamp: new Date().toISOString()
-    };
-    localStorage.setItem('userProfile', JSON.stringify(profileToStore));
-    setIsEditing(false);
-    toast({
-      title: "Profile Saved!",
-      description: "Your information has been updated successfully.",
-    });
+    try {
+        const profileToStore = {
+          data: profileData,
+          resumeFile: resumeFile,
+          profilePhoto: profilePhoto,
+          photoPreview: profilePhotoPreview,
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('userProfile', JSON.stringify(profileToStore));
+        setIsEditing(false);
+        toast({
+          title: "Profile Saved!",
+          description: "Your information has been updated successfully.",
+        });
+    } catch(e) {
+        console.error(e)
+        toast({
+            variant: "destructive",
+            title: "Error saving profile",
+            description: "Could not save your profile. Please try again."
+        })
+    }
   };
   
   const handleGenerateSummary = () => {
@@ -115,6 +130,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <BackButton />
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <div className="flex justify-between items-start">

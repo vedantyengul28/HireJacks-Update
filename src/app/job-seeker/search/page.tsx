@@ -9,6 +9,7 @@ import { Briefcase, MapPin, Search as SearchIcon, Code, Bookmark, Check } from '
 import { sampleJobs, type Job } from '@/lib/sample-data';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import BackButton from '@/components/ui/back-button';
 
 function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; }) {
 
@@ -115,7 +116,13 @@ export default function JobSearchPage() {
   };
   
   const handleSaveJob = (jobToSave: Job) => {
-    const savedJobs: Job[] = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    let savedJobs: Job[] = [];
+    try {
+      savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    } catch (e) {
+      console.error(e)
+    }
+
     const isAlreadySaved = savedJobs.some(job => job.id === jobToSave.id);
     if (!isAlreadySaved) {
         localStorage.setItem('savedJobs', JSON.stringify([...savedJobs, jobToSave]));
@@ -159,6 +166,7 @@ export default function JobSearchPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <BackButton />
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Find Your Dream Job</CardTitle>

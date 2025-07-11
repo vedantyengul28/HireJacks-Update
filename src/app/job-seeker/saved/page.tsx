@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Trash2, Check } from 'lucide-react';
 import { type Job } from '@/lib/sample-data';
 import { useToast } from '@/hooks/use-toast';
+import BackButton from '@/components/ui/back-button';
 
 function SavedJobCard({ job, onRemove, onApply, isApplied }: { job: Job, onRemove: (jobId: number) => void, onApply: (jobId: number) => void, isApplied: boolean }) {
 
@@ -59,13 +60,17 @@ export default function SavedJobsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const jobsFromStorage = localStorage.getItem('savedJobs');
-    if (jobsFromStorage) {
-      setSavedJobs(JSON.parse(jobsFromStorage));
-    }
-    const appliedFromStorage = localStorage.getItem('appliedJobs');
-    if (appliedFromStorage) {
-      setAppliedJobs(JSON.parse(appliedFromStorage));
+    try {
+        const jobsFromStorage = localStorage.getItem('savedJobs');
+        if (jobsFromStorage) {
+          setSavedJobs(JSON.parse(jobsFromStorage));
+        }
+        const appliedFromStorage = localStorage.getItem('appliedJobs');
+        if (appliedFromStorage) {
+          setAppliedJobs(JSON.parse(appliedFromStorage));
+        }
+    } catch(e) {
+        console.error(e)
     }
   }, []);
 
@@ -106,6 +111,7 @@ export default function SavedJobsPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <BackButton />
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <div className='flex items-center gap-4'>

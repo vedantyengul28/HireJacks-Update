@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Bell, Briefcase, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import BackButton from '@/components/ui/back-button';
 
 export interface Notification {
   id: string;
@@ -31,19 +32,28 @@ export default function NotificationsPage() {
   const markAsRead = (id: string) => {
     const updatedNotifications = notifications.map(n => n.id === id ? { ...n, read: true } : n);
     setNotifications(updatedNotifications);
-    localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+    try {
+      localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+    } catch (error) {
+        console.error("Error saving notifications to localStorage:", error);
+    }
   };
   
   const deleteNotification = (id: string) => {
     const updatedNotifications = notifications.filter(n => n.id !== id);
     setNotifications(updatedNotifications);
-    localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+    try {
+      localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+    } catch (error) {
+        console.error("Error saving notifications to localStorage:", error);
+    }
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <BackButton />
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <div className="flex items-center gap-4">
