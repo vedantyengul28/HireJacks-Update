@@ -5,19 +5,11 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, MapPin, Trash2 } from 'lucide-react';
-import { type Job } from '@/lib/sample-data';
+import { Star, MapPin, Trash2, Check } from 'lucide-react';
+import { type Job, sampleJobs } from '@/lib/sample-data';
 import { useToast } from '@/hooks/use-toast';
 
-function SavedJobCard({ job, onRemove }: { job: Job, onRemove: (jobId: number) => void }) {
-  const { toast } = useToast();
-  
-  const handleApply = () => {
-    toast({
-        title: "Application Sent!",
-        description: `You successfully applied for the ${job.title} position at ${job.company}.`
-    });
-  };
+function SavedJobCard({ job, onRemove, onApply, isApplied }: { job: Job, onRemove: (jobId: number) => void, onApply: (jobId: number) => void, isApplied: boolean }) {
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
@@ -45,7 +37,14 @@ function SavedJobCard({ job, onRemove }: { job: Job, onRemove: (jobId: number) =
                     <Trash2 className="h-5 w-5" />
                     <span className="sr-only">Remove Job</span>
                 </Button>
-                <Button size="sm" onClick={handleApply}>Apply Now</Button>
+                {isApplied ? (
+                    <Button size="sm" disabled>
+                        <Check className="mr-2 h-4 w-4" />
+                        Applied
+                    </Button>
+                ) : (
+                    <Button size="sm" onClick={() => onApply(job.id)}>Apply Now</Button>
+                )}
              </div>
         </div>
       </CardContent>
@@ -56,11 +55,14 @@ function SavedJobCard({ job, onRemove }: { job: Job, onRemove: (jobId: number) =
 
 export default function SavedJobsPage() {
   const [savedJobs, setSavedJobs] = useState<Job[]>([]);
+  const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     const jobsFromStorage = JSON.parse(localStorage.getItem('savedJobs') || '[]');
     setSavedJobs(jobsFromStorage);
+    const appliedFromStorage = JSON.parse(localStorage.getItem('appliedJobs') || '[]');
+    setAppliedJobs(appliedFromStorage);
   }, []);
 
   const handleRemoveJob = (jobId: number) => {
@@ -73,6 +75,19 @@ export default function SavedJobsPage() {
         description: "The job has been removed from your saved list."
     });
   }
+
+  const handleApply = (jobId: number) => {
+    const updatedAppliedJobs = [...appliedJobs, jobId];
+    setAppliedJobs(updatedAppliedJobs);
+    localStorage.setItem('appliedJobs', JSON.stringify(updatedAppliedJobs));
+    const job = savedJobs.find(j => j.id === jobId);
+     if (job) {
+        toast({
+            title: "Application Sent!",
+            description: `You successfully applied for the ${job.title} position at ${job.company}.`
+        });
+    }
+  };
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -92,7 +107,7 @@ export default function SavedJobsPage() {
             {savedJobs.length > 0 ? (
                 <div className="space-y-4">
                     {savedJobs.map(job => (
-                        <SavedJobCard key={job.id} job={job} onRemove={handleRemoveJob}/>
+                        <SavedJobCard key={job.id} job={job} onRemove={handleRemoveJob} onApply={handleApply} isApplied={appliedJobs.includes(job.id)} />
                     ))}
                 </div>
             ) : (
@@ -107,3 +122,5 @@ export default function SavedJobsPage() {
     </div>
   );
 }
+
+    

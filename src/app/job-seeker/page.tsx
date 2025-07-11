@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { sampleJobs, type Job } from '@/lib/sample-data';
-import { ArrowUp, Briefcase, Loader2, MapPin, Bookmark } from 'lucide-react';
+import { ArrowUp, Briefcase, Loader2, MapPin, Bookmark, Check } from 'lucide-react';
 import { useEffect, useState, useActionState, useTransition } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
@@ -109,15 +109,7 @@ function ProfileCompletionCard() {
     );
 }
 
-function JobCard({ job, onSave }: { job: Job; onSave: (job: Job) => void; }) {
-  const { toast } = useToast();
-
-  const handleApply = () => {
-    toast({
-        title: "Application Sent!",
-        description: `You successfully applied for the ${job.title} position at ${job.company}.`
-    });
-  }
+function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; }) {
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
@@ -145,7 +137,14 @@ function JobCard({ job, onSave }: { job: Job; onSave: (job: Job) => void; }) {
                     <Bookmark className="h-4 w-4" />
                     <span className="sr-only">Save Job</span>
                 </Button>
-                <Button size="sm" onClick={handleApply}>Apply Now</Button>
+                {isApplied ? (
+                    <Button size="sm" disabled>
+                        <Check className="mr-2 h-4 w-4" />
+                        Applied
+                    </Button>
+                ) : (
+                    <Button size="sm" onClick={() => onApply(job.id)}>Apply Now</Button>
+                )}
             </div>
         </div>
       </CardContent>
@@ -157,6 +156,7 @@ function AiJobFeed() {
   const [isPending, startTransition] = useTransition();
   const [state, formAction] = useActionState(handleSuggestJobs, { message: '', jobs: [] });
   const [submitted, setSubmitted] = useState(false);
+  const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
   const { toast } = useToast();
 
   const profileSummary = "Experienced frontend developer proficient in React, TypeScript, and Next.js. Passionate about building accessible user interfaces and working with modern web technologies. Skilled in state management with Redux and Zustand, and building design systems with Tailwind CSS.";
@@ -170,6 +170,8 @@ function AiJobFeed() {
         });
         setSubmitted(true);
     }
+    const storedAppliedJobs = JSON.parse(localStorage.getItem('appliedJobs') || '[]');
+    setAppliedJobs(storedAppliedJobs);
   }, [submitted, formAction, profileSummary]);
 
   const handleSaveJob = (jobToSave: Job) => {
@@ -190,8 +192,22 @@ function AiJobFeed() {
     }
   };
 
+  const handleApply = (jobId: number) => {
+    const updatedAppliedJobs = [...appliedJobs, jobId];
+    setAppliedJobs(updatedAppliedJobs);
+    localStorage.setItem('appliedJobs', JSON.stringify(updatedAppliedJobs));
+    const job = sampleJobs.find(j => j.id === jobId);
+    if (job) {
+        toast({
+            title: "Application Sent!",
+            description: `You successfully applied for the ${job.title} position at ${job.company}.`
+        });
+    }
+  };
+  
   const pending = isPending || (submitted && !state.jobs?.length && !state.message.startsWith('No'));
-  const suggestedJobs = sampleJobs.filter(job => state.jobs?.some(suggestion => job.title.toLowerCase().includes(suggestion.toLowerCase().split(' ')[1] || '')));
+  const allJobs = sampleJobs.slice().reverse();
+  const suggestedJobs = allJobs.filter(job => state.jobs?.some(suggestion => job.title.toLowerCase().includes(suggestion.toLowerCase().split(' ')[1] || '')));
 
 
   return (
@@ -213,7 +229,7 @@ function AiJobFeed() {
       {!pending && suggestedJobs.length > 0 && (
         <div className="space-y-4">
           {suggestedJobs.map(job => (
-            <JobCard key={job.id} job={job} onSave={handleSaveJob} />
+            <JobCard key={job.id} job={job} onSave={handleSaveJob} onApply={handleApply} isApplied={appliedJobs.includes(job.id)} />
           ))}
         </div>
       )}
@@ -236,3 +252,5 @@ export default function JobSeekerPage() {
     </div>
   );
 }
+
+    

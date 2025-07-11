@@ -1,24 +1,16 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Briefcase, MapPin, Search as SearchIcon, Code, Bookmark } from 'lucide-react';
+import { Briefcase, MapPin, Search as SearchIcon, Code, Bookmark, Check } from 'lucide-react';
 import { sampleJobs, type Job } from '@/lib/sample-data';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 
-function JobCard({ job, onSave }: { job: Job; onSave: (job: Job) => void; }) {
-  const { toast } = useToast();
-
-  const handleApply = () => {
-    toast({
-        title: "Application Sent!",
-        description: `You successfully applied for the ${job.title} position at ${job.company}.`
-    });
-  }
+function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; }) {
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
@@ -47,7 +39,14 @@ function JobCard({ job, onSave }: { job: Job; onSave: (job: Job) => void; }) {
                     <Bookmark className="h-4 w-4" />
                     <span className="sr-only">Save Job</span>
                 </Button>
-                <Button size="sm" onClick={handleApply}>Apply Now</Button>
+                {isApplied ? (
+                    <Button size="sm" disabled>
+                        <Check className="mr-2 h-4 w-4" />
+                        Applied
+                    </Button>
+                ) : (
+                    <Button size="sm" onClick={() => onApply(job.id)}>Apply Now</Button>
+                )}
             </div>
         </div>
       </CardContent>
@@ -63,7 +62,17 @@ export default function JobSearchPage() {
     location: '',
     skills: '',
   });
-  const [filteredJobs, setFilteredJobs] = useState<Job[]>(sampleJobs);
+  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
+  const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
+
+  useEffect(() => {
+    // Load jobs and applied status from localStorage on mount
+    const allJobs = JSON.parse(localStorage.getItem('allJobs') || JSON.stringify(sampleJobs));
+    setFilteredJobs(allJobs.slice().reverse()); // Show newest first
+    const storedAppliedJobs = JSON.parse(localStorage.getItem('appliedJobs') || '[]');
+    setAppliedJobs(storedAppliedJobs);
+  }, []);
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -72,11 +81,12 @@ export default function JobSearchPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    const allJobs = JSON.parse(localStorage.getItem('allJobs') || JSON.stringify(sampleJobs));
     const lowercasedKeyword = filters.keyword.toLowerCase();
     const lowercasedLocation = filters.location.toLowerCase();
     const lowercasedSkills = filters.skills.toLowerCase().split(',').map(s => s.trim()).filter(s => s);
 
-    const results = sampleJobs.filter(job => {
+    const results = allJobs.filter((job: Job) => {
       const titleMatch = job.title.toLowerCase().includes(lowercasedKeyword);
       const companyMatch = job.company.toLowerCase().includes(lowercasedKeyword);
       const descriptionMatch = job.description.toLowerCase().includes(lowercasedKeyword);
@@ -91,7 +101,7 @@ export default function JobSearchPage() {
       return keywordMatch && locationMatch && skillsMatch;
     });
 
-    setFilteredJobs(results);
+    setFilteredJobs(results.slice().reverse());
   };
   
   const handleSaveJob = (jobToSave: Job) => {
@@ -111,6 +121,20 @@ export default function JobSearchPage() {
         });
     }
   };
+
+  const handleApply = (jobId: number) => {
+    const updatedAppliedJobs = [...appliedJobs, jobId];
+    setAppliedJobs(updatedAppliedJobs);
+    localStorage.setItem('appliedJobs', JSON.stringify(updatedAppliedJobs));
+    const job = filteredJobs.find(j => j.id === jobId);
+    if (job) {
+        toast({
+            title: "Application Sent!",
+            description: `You successfully applied for the ${job.title} position at ${job.company}.`
+        });
+    }
+  };
+
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -156,7 +180,7 @@ export default function JobSearchPage() {
         </h2>
         {filteredJobs.length > 0 ? (
           filteredJobs.map(job => (
-            <JobCard key={job.id} job={job} onSave={handleSaveJob} />
+            <JobCard key={job.id} job={job} onSave={handleSaveJob} onApply={handleApply} isApplied={appliedJobs.includes(job.id)} />
           ))
         ) : (
           <div className="text-center py-16">
@@ -167,3 +191,5 @@ export default function JobSearchPage() {
     </div>
   );
 }
+
+    
