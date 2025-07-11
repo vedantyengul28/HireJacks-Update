@@ -97,7 +97,7 @@ export default function RoleSelectionPage() {
               <span className="sr-only">Toggle Menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0">
+          <SheetContent side="right" className="p-0">
             <Sidebar />
           </SheetContent>
         </Sheet>

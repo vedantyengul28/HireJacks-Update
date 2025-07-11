@@ -26,7 +26,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 const sidebarLinks = [
   { icon: Search, label: 'Search jobs', href: '/job-seeker/search' },
@@ -99,7 +99,7 @@ export default function IntroductionPage() {
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0">
+            <SheetContent side="right" className="p-0">
               <Sidebar />
             </SheetContent>
           </Sheet>
