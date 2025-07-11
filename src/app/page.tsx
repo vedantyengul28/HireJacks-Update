@@ -27,9 +27,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 
 const sidebarLinks = [
-  { icon: Search, label: 'Search jobs', href: '#' },
+  { icon: Search, label: 'Search jobs', href: '/job-seeker/search' },
   { icon: MessageSquare, label: 'Chat for help', href: '#' },
-  { icon: Briefcase, label: 'Jobseeker services', href: '#' },
   { icon: Eye, label: 'Display preferences', href: '#' },
   { icon: BookOpen, label: 'HireJacks blog', href: '#' },
   { icon: HelpCircle, label: 'How HireJacks works', href: '#' },
@@ -41,7 +40,7 @@ function Sidebar() {
   return (
     <div className="flex h-full flex-col bg-card text-card-foreground">
       <SheetHeader className="p-4 text-left">
-        <SheetTitle className="sr-only">Menu</SheetTitle>
+        <SheetTitle>Menu</SheetTitle>
         <div className="flex items-center gap-4">
           <div className="rounded-full border p-2">
             <User className="h-6 w-6 text-muted-foreground" />
