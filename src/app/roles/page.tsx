@@ -15,7 +15,7 @@ export default function RoleSelectionPage() {
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
-        <Link href="/job-seeker">
+        <Link href="/job-seeker/login">
           <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-primary/50">
             <CardHeader className="flex flex-col items-center justify-center text-center p-8">
               <div className="p-4 bg-primary/10 rounded-full mb-4">
