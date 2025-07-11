@@ -7,7 +7,7 @@ import { Home, Briefcase, User, Settings, Star, Bot, MessageSquare, Menu } from 
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useEffect, useState } from 'react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 
 interface ProfileData {
@@ -122,6 +122,9 @@ export default function JobSeekerLayout({
                      </Button>
                    </SheetTrigger>
                    <SheetContent side="left" className="p-0">
+                    <SheetHeader>
+                      <SheetTitle className="sr-only">Menu</SheetTitle>
+                    </SheetHeader>
                      <SidebarContent />
                    </SheetContent>
                  </Sheet>
