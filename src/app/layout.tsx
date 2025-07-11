@@ -25,7 +25,7 @@ export default function RootLayout({
       <body className="font-body antialiased" suppressHydrationWarning>
         {children}
         <Toaster />
-        <ServiceWorkerRegistrar />
+        
       </body>
     </html>
   );
