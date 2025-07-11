@@ -9,7 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { sampleJobs, type Job } from '@/lib/sample-data';
 import { ArrowUp, Briefcase, FileText, Link as LinkIcon, Loader2, MapPin, Sparkles } from 'lucide-react';
-import { useEffect, useState, useActionState } from 'react';
+import { useEffect, useState, useActionState, useTransition } from 'react';
 import Link from 'next/link';
 
 function ProfileCompletionCard() {
@@ -111,6 +111,7 @@ function JobCard({ job }: { job: Job }) {
 }
 
 function AiJobFeed() {
+  const [isPending, startTransition] = useTransition();
   const [state, formAction] = useActionState(handleSuggestJobs, { message: '', jobs: [] });
   const [submitted, setSubmitted] = useState(false);
 
@@ -122,12 +123,14 @@ function AiJobFeed() {
     if (!submitted) {
         const formData = new FormData();
         formData.append('profile', profileSummary);
-        formAction(formData);
+        startTransition(() => {
+            formAction(formData);
+        });
         setSubmitted(true);
     }
   }, [submitted, formAction, profileSummary]);
 
-  const { pending } = { pending: submitted && !state.jobs?.length && !state.message.startsWith('No') };
+  const pending = isPending || (submitted && !state.jobs?.length && !state.message.startsWith('No'));
   const suggestedJobs = sampleJobs.filter(job => state.jobs?.some(suggestion => job.title.includes(suggestion.split(' ')[1])));
 
 
