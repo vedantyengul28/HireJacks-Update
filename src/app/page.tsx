@@ -21,6 +21,7 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
@@ -40,6 +41,7 @@ function Sidebar() {
   return (
     <div className="flex h-full flex-col bg-card text-card-foreground">
       <SheetHeader className="p-4 text-left">
+        <SheetTitle className="sr-only">Menu</SheetTitle>
         <div className="flex items-center gap-4">
           <div className="rounded-full border p-2">
             <User className="h-6 w-6 text-muted-foreground" />
