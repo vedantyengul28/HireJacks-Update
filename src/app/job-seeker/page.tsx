@@ -163,11 +163,23 @@ function AiJobFeed() {
   const profileSummary = "Experienced frontend developer proficient in React, TypeScript, and Next.js. Passionate about building accessible user interfaces and working with modern web technologies. Skilled in state management with Redux and Zustand, and building design systems with Tailwind CSS.";
 
   useEffect(() => {
-      const storedJobs = localStorage.getItem('allJobs');
-      setAllJobs(storedJobs ? JSON.parse(storedJobs) : sampleJobs);
+    try {
+        const storedJobs = localStorage.getItem('allJobs');
+        if (storedJobs) {
+            setAllJobs(JSON.parse(storedJobs));
+        } else {
+            setAllJobs(sampleJobs);
+            localStorage.setItem('allJobs', JSON.stringify(sampleJobs));
+        }
 
-      const storedAppliedJobs = localStorage.getItem('appliedJobs');
-      setAppliedJobs(storedAppliedJobs ? JSON.parse(storedAppliedJobs) : []);
+        const storedAppliedJobs = localStorage.getItem('appliedJobs');
+        if(storedAppliedJobs) {
+            setAppliedJobs(JSON.parse(storedAppliedJobs));
+        }
+    } catch (error) {
+        console.error("Error accessing localStorage:", error);
+        setAllJobs(sampleJobs);
+    }
   }, []);
 
   useEffect(() => {
@@ -203,6 +215,18 @@ function AiJobFeed() {
     const updatedAppliedJobs = [...appliedJobs, jobId];
     setAppliedJobs(updatedAppliedJobs);
     localStorage.setItem('appliedJobs', JSON.stringify(updatedAppliedJobs));
+
+    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+    
+    // Ensure we don't add duplicate applications
+    const hasAlreadyApplied = applications.some((app: any) => app.jobId === jobId && app.applicantProfile.data.email === userProfile.data.email);
+
+    if (!hasAlreadyApplied) {
+      applications.push({ jobId, applicantProfile: userProfile });
+      localStorage.setItem('applications', JSON.stringify(applications));
+    }
+    
     const job = allJobs.find(j => j.id === jobId);
     if (job) {
         toast({

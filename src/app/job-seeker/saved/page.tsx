@@ -84,6 +84,17 @@ export default function SavedJobsPage() {
     const updatedAppliedJobs = [...appliedJobs, jobId];
     setAppliedJobs(updatedAppliedJobs);
     localStorage.setItem('appliedJobs', JSON.stringify(updatedAppliedJobs));
+
+    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+    
+    const hasAlreadyApplied = applications.some((app: any) => app.jobId === jobId && app.applicantProfile.data.email === userProfile.data.email);
+
+    if (!hasAlreadyApplied) {
+      applications.push({ jobId, applicantProfile: userProfile });
+      localStorage.setItem('applications', JSON.stringify(applications));
+    }
+
     const job = savedJobs.find(j => j.id === jobId);
      if (job) {
         toast({

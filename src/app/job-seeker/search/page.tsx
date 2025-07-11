@@ -67,14 +67,20 @@ export default function JobSearchPage() {
   const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
 
   useEffect(() => {
-    const storedJobs = localStorage.getItem('allJobs');
-    const jobs = storedJobs ? JSON.parse(storedJobs) : sampleJobs;
-    setAllJobs(jobs);
-    setFilteredJobs(jobs.slice().reverse()); // Show newest first
-    
-    const storedAppliedJobs = localStorage.getItem('appliedJobs');
-    if (storedAppliedJobs) {
-      setAppliedJobs(JSON.parse(storedAppliedJobs));
+    try {
+        const storedJobs = localStorage.getItem('allJobs');
+        const jobs = storedJobs ? JSON.parse(storedJobs) : sampleJobs;
+        setAllJobs(jobs);
+        setFilteredJobs(jobs.slice().reverse()); // Show newest first
+        
+        const storedAppliedJobs = localStorage.getItem('appliedJobs');
+        if (storedAppliedJobs) {
+          setAppliedJobs(JSON.parse(storedAppliedJobs));
+        }
+    } catch(error) {
+        console.error("Error accessing localStorage:", error);
+        setAllJobs(sampleJobs);
+        setFilteredJobs(sampleJobs.slice().reverse());
     }
   }, []);
   
@@ -130,7 +136,18 @@ export default function JobSearchPage() {
     const updatedAppliedJobs = [...appliedJobs, jobId];
     setAppliedJobs(updatedAppliedJobs);
     localStorage.setItem('appliedJobs', JSON.stringify(updatedAppliedJobs));
-    const job = filteredJobs.find(j => j.id === jobId);
+
+    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+    
+    const hasAlreadyApplied = applications.some((app: any) => app.jobId === jobId && app.applicantProfile.data.email === userProfile.data.email);
+
+    if (!hasAlreadyApplied) {
+      applications.push({ jobId, applicantProfile: userProfile });
+      localStorage.setItem('applications', JSON.stringify(applications));
+    }
+    
+    const job = allJobs.find(j => j.id === jobId);
     if (job) {
         toast({
             title: "Application Sent!",
