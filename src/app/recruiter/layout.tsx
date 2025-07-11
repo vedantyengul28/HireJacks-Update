@@ -3,8 +3,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { PlusSquare, Users, BarChart3, Briefcase } from 'lucide-react';
+import { PlusSquare, Users, BarChart3, Briefcase, LogIn } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 export default function RecruiterLayout({
   children,
@@ -19,13 +20,23 @@ export default function RecruiterLayout({
     { href: '/recruiter/analytics', icon: BarChart3, label: 'Analytics' },
   ];
 
+  if (pathname.includes('/login')) {
+     return <main className="flex-1 bg-background">{children}</main>;
+  }
+
   return (
     <div className="flex h-dvh flex-col">
       <header className="flex items-center justify-between p-4 border-b bg-card">
          <Link href="/" className="flex items-center gap-2 text-accent">
           <Briefcase className="h-6 w-6" />
-          <h1 className="text-xl font-bold">HireJacks</h1>
+          <h1 className="text-xl font-bold">HireJacks Recruiter</h1>
         </Link>
+        <Button asChild variant="outline" size="sm">
+            <Link href="/recruiter/login">
+                <LogIn className="mr-2 h-4 w-4" />
+                Login
+            </Link>
+        </Button>
       </header>
       <main className="flex-1 overflow-y-auto bg-background pb-20">
         {children}

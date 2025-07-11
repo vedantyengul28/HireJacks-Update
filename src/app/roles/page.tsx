@@ -126,7 +126,7 @@ export default function RoleSelectionPage() {
               </CardHeader>
             </Card>
           </Link>
-          <Link href="/recruiter">
+          <Link href="/recruiter/login">
             <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-accent/50">
               <CardHeader className="flex flex-col items-center justify-center text-center p-8">
                 <div className="p-4 bg-accent/10 rounded-full mb-4">
