@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
+import ServiceWorkerRegistrar from '@/components/service-worker-registrar';
 
 export const metadata: Metadata = {
   title: 'HireJacks',
@@ -13,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -24,19 +25,7 @@ export default function RootLayout({
       <body className="font-body antialiased">
         {children}
         <Toaster />
-        <script>
-          {`
-            if ('serviceWorker' in navigator) {
-              window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(registration => {
-                  console.log('SW registered: ', registration);
-                }).catch(registrationError => {
-                  console.log('SW registration failed: ', registrationError);
-                });
-              });
-            }
-          `}
-        </script>
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );
