@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useEffect, useState } from 'react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 
 interface ProfileInfo {
@@ -110,6 +110,9 @@ export default function JobSeekerLayout({
                         </Button>
                     </SheetTrigger>
                     <SheetContent side="left" className="p-0 w-[280px]">
+                        <SheetHeader>
+                            <SheetTitle className="sr-only">Menu</SheetTitle>
+                        </SheetHeader>
                         <SidebarContent />
                     </SheetContent>
                 </Sheet>
