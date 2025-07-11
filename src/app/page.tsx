@@ -1,11 +1,20 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 
 export default function IntroductionPage() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center bg-background p-4 sm:p-6 text-center">
-      <div className="flex flex-col items-center justify-center space-y-8">
+      <div className="flex flex-col items-center justify-center space-y-8 max-w-4xl mx-auto">
+        <Image
+            src="https://placehold.co/600x400.png"
+            alt="Handshake between a recruiter and a job seeker"
+            width={600}
+            height={400}
+            className="rounded-lg shadow-2xl"
+            data-ai-hint="recruitment handshake"
+          />
         <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-primary tracking-tight">
           Welcome to HireJacks
         </h1>

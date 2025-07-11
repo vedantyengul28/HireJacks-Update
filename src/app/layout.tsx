@@ -22,7 +22,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#29ABE2" />
       </head>
-      <body className="font-body antialiased">
+      <body className="font-body antialiased" suppressHydrationWarning>
         {children}
         <Toaster />
         <ServiceWorkerRegistrar />
