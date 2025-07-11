@@ -38,13 +38,17 @@ function SidebarContent() {
     const [profile, setProfile] = useState<ProfileInfo>({ name: 'User', photoUrl: null });
 
     useEffect(() => {
-        const storedProfile = localStorage.getItem('userProfile');
-        if (storedProfile) {
-            const { data, photoPreview } = JSON.parse(storedProfile);
-            setProfile({
-                name: data.firstName ? `${data.firstName} ${data.lastName}`.trim() : 'Anonymous User',
-                photoUrl: photoPreview
-            });
+        try {
+            const storedProfile = localStorage.getItem('userProfile');
+            if (storedProfile) {
+                const { data, photoPreview } = JSON.parse(storedProfile);
+                setProfile({
+                    name: data.firstName ? `${data.firstName} ${data.lastName}`.trim() : 'Anonymous User',
+                    photoUrl: photoPreview
+                });
+            }
+        } catch (error) {
+            console.error("Error accessing localStorage:", error);
         }
     }, []);
 
