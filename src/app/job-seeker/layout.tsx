@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Star, User, Briefcase } from 'lucide-react';
+import { Home, Briefcase, User, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function JobSeekerLayout({
@@ -13,9 +13,10 @@ export default function JobSeekerLayout({
   const pathname = usePathname();
 
   const navItems = [
-    { href: '/job-seeker', icon: Search, label: 'Search' },
-    { href: '/job-seeker/saved', icon: Star, label: 'Saved' },
+    { href: '/job-seeker', icon: Home, label: 'Home' },
+    { href: '/job-seeker/apply', icon: Briefcase, label: 'Apply Jobs' },
     { href: '/job-seeker/profile', icon: User, label: 'Profile' },
+    { href: '/job-seeker/notifications', icon: Bell, label: 'Notifications' },
   ];
 
   return (
