@@ -22,11 +22,9 @@ export default function RecruiterAuthPage() {
   const router = useRouter();
   const { toast } = useToast();
   
-  // State for login form
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
-  // State for signup form
   const [signupCompany, setSignupCompany] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
@@ -41,9 +39,30 @@ export default function RecruiterAuthPage() {
       });
       return;
     }
-    // In a real app, you'd authenticate here.
-    // For now, we just navigate.
-    router.push('/recruiter');
+    
+    try {
+        const recruiters = JSON.parse(localStorage.getItem('recruiterUsers') || '[]');
+        const recruiter = recruiters.find((r: any) => r.email === loginEmail && r.password === loginPassword);
+
+        if (recruiter) {
+             // You can also store recruiter-specific info if needed
+            localStorage.setItem('recruiterProfile', JSON.stringify({ company: recruiter.company, email: recruiter.email }));
+            router.push('/recruiter');
+        } else {
+             toast({
+                variant: "destructive",
+                title: "Login Failed",
+                description: "Invalid email or password.",
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        toast({
+            variant: "destructive",
+            title: "Login Error",
+            description: "An unexpected error occurred.",
+        });
+    }
   };
 
   const handleSignup = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -56,9 +75,40 @@ export default function RecruiterAuthPage() {
       });
       return;
     }
-     // In a real app, you'd create an account here.
-     // For now, we just navigate.
-    router.push('/recruiter');
+
+    try {
+        const recruiters = JSON.parse(localStorage.getItem('recruiterUsers') || '[]');
+        const existingRecruiter = recruiters.find((r: any) => r.email === signupEmail);
+
+        if (existingRecruiter) {
+            toast({
+                variant: "destructive",
+                title: "Signup Failed",
+                description: "An account with this email already exists.",
+            });
+            return;
+        }
+
+        const newRecruiter = { company: signupCompany, email: signupEmail, password: signupPassword };
+        recruiters.push(newRecruiter);
+        localStorage.setItem('recruiterUsers', JSON.stringify(recruiters));
+        
+        localStorage.setItem('recruiterProfile', JSON.stringify({ company: newRecruiter.company, email: newRecruiter.email }));
+
+        toast({
+            title: "Account Created!",
+            description: "Your recruiter account has been successfully created.",
+        });
+
+        router.push('/recruiter');
+    } catch (error) {
+        console.error(error);
+        toast({
+            variant: "destructive",
+            title: "Signup Error",
+            description: "An unexpected error occurred.",
+        });
+    }
   };
 
   return (

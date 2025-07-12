@@ -21,11 +21,9 @@ export default function JobSeekerAuthPage() {
   const router = useRouter();
   const { toast } = useToast();
   
-  // State for login form
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
-  // State for signup form
   const [signupName, setSignupName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
@@ -40,9 +38,43 @@ export default function JobSeekerAuthPage() {
       });
       return;
     }
-    // In a real app, you'd authenticate here.
-    // For now, we just navigate.
-    router.push('/job-seeker/profile');
+    
+    try {
+        const users = JSON.parse(localStorage.getItem('jobSeekerUsers') || '[]');
+        const user = users.find((u: any) => u.email === loginEmail && u.password === loginPassword);
+
+        if (user) {
+            // A real app would fetch the full profile here
+            const profileToStore = {
+              data: {
+                  firstName: user.name.split(' ')[0] || '',
+                  lastName: user.name.split(' ')[1] || '',
+                  email: user.email,
+                  headline: '',
+                  summary: '',
+              },
+              resumeFile: null,
+              profilePhoto: null,
+              photoPreview: null,
+              timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('userProfile', JSON.stringify(profileToStore));
+            router.push('/job-seeker/profile');
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Login Failed",
+                description: "Invalid email or password.",
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        toast({
+            variant: "destructive",
+            title: "Login Error",
+            description: "An unexpected error occurred.",
+        });
+    }
   };
 
   const handleSignup = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -55,9 +87,45 @@ export default function JobSeekerAuthPage() {
       });
       return;
     }
-     // In a real app, you'd create an account here.
-     // For now, we just navigate.
-    router.push('/job-seeker/profile');
+
+    try {
+        const users = JSON.parse(localStorage.getItem('jobSeekerUsers') || '[]');
+        const existingUser = users.find((u: any) => u.email === signupEmail);
+        
+        if (existingUser) {
+            toast({
+                variant: "destructive",
+                title: "Signup Failed",
+                description: "An account with this email already exists.",
+            });
+            return;
+        }
+
+        const newUser = { name: signupName, email: signupEmail, password: signupPassword };
+        users.push(newUser);
+        localStorage.setItem('jobSeekerUsers', JSON.stringify(users));
+
+        const [firstName, lastName] = signupName.split(' ');
+        const profileToStore = {
+            data: { firstName, lastName, email: signupEmail, headline: '', summary: '' },
+            timestamp: new Date().toISOString(),
+        };
+        localStorage.setItem('userProfile', JSON.stringify(profileToStore));
+        
+        toast({
+            title: "Account Created!",
+            description: "You have been successfully signed up.",
+        });
+        
+        router.push('/job-seeker/profile');
+    } catch (error) {
+        console.error(error);
+        toast({
+            variant: "destructive",
+            title: "Signup Error",
+            description: "An unexpected error occurred.",
+        });
+    }
   };
 
 
