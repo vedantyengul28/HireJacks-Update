@@ -1,5 +1,8 @@
 
-import Link from 'next/link';
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -12,8 +15,52 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Briefcase } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
 
 export default function RecruiterAuthPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  
+  // State for login form
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+
+  // State for signup form
+  const [signupCompany, setSignupCompany] = useState('');
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+
+  const handleLogin = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (!loginEmail || !loginPassword) {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Please enter both email and password.",
+      });
+      return;
+    }
+    // In a real app, you'd authenticate here.
+    // For now, we just navigate.
+    router.push('/recruiter');
+  };
+
+  const handleSignup = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (!signupCompany || !signupEmail || !signupPassword) {
+      toast({
+        variant: "destructive",
+        title: "Signup Failed",
+        description: "Please fill out all fields.",
+      });
+      return;
+    }
+     // In a real app, you'd create an account here.
+     // For now, we just navigate.
+    router.push('/recruiter');
+  };
+
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-background p-4">
       <div className="flex items-center gap-2 text-primary mb-8">
@@ -36,15 +83,13 @@ export default function RecruiterAuthPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="recruiter@company.com" required />
+                <Input id="email" type="email" placeholder="recruiter@company.com" required value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" required />
+                <Input id="password" type="password" required value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
               </div>
-              <Link href="/recruiter" className="w-full">
-                <Button className="w-full">Login</Button>
-              </Link>
+              <Button className="w-full" onClick={handleLogin}>Login</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -59,19 +104,17 @@ export default function RecruiterAuthPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Company Name</Label>
-                <Input id="name" type="text" placeholder="Your Company Inc." required />
+                <Input id="name" type="text" placeholder="Your Company Inc." required value={signupCompany} onChange={(e) => setSignupCompany(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-email">Email</Label>
-                <Input id="signup-email" type="email" placeholder="recruiter@company.com" required />
+                <Input id="signup-email" type="email" placeholder="recruiter@company.com" required value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-password">Password</Label>
-                <Input id="signup-password" type="password" required />
+                <Input id="signup-password" type="password" required value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} />
               </div>
-              <Link href="/recruiter" className="w-full">
-                <Button className="w-full">Create Account</Button>
-              </Link>
+              <Button className="w-full" onClick={handleSignup}>Create Account</Button>
             </CardContent>
           </Card>
         </TabsContent>
