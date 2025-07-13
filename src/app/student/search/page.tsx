@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import BackButton from '@/components/ui/back-button';
 import { handleSuggestJobs } from '@/app/actions';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import type { Notification } from '../notifications/page';
 
 
 function JobCard({ job, onSave, onApply, isApplied, isSaved }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; isSaved: boolean; }) {
@@ -129,6 +130,23 @@ export default function AiJobSearchPage() {
     setSavedJobs(updatedSavedJobs.map(p => p.id));
   };
   
+  const addNotification = (newNotification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+    try {
+        const key = newNotification.forAdmin ? 'adminNotifications' : 'notifications';
+        const existingNotifications: Notification[] = JSON.parse(localStorage.getItem(key) || '[]');
+        const notification: Notification = {
+            ...newNotification,
+            id: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
+            read: false,
+        };
+        const updatedNotifications = [...existingNotifications, notification];
+        localStorage.setItem(key, JSON.stringify(updatedNotifications));
+    } catch (error) {
+        console.error("Failed to add notification:", error);
+    }
+  };
+
   const handleApply = (jobId: number) => {
     const updatedAppliedJobs = [...appliedJobs, jobId];
     setAppliedJobs(updatedAppliedJobs);
@@ -149,6 +167,15 @@ export default function AiJobSearchPage() {
         toast({
             title: "Application Sent!",
             description: `You successfully applied for the ${job.title} position at ${job.organization}.`
+        });
+        addNotification({
+            title: "Application Sent!",
+            description: `You applied for ${job.title} at ${job.organization}.`
+        });
+        addNotification({
+            title: 'New Application!',
+            description: `${userProfile.data.firstName || 'A student'} applied for "${job.title}".`,
+            forAdmin: true
         });
     }
   };
@@ -241,4 +268,10 @@ export default function AiJobSearchPage() {
       </div>
     </div>
   );
+}
+
+declare module '../notifications/page' {
+    interface Notification {
+        forAdmin?: boolean;
+    }
 }

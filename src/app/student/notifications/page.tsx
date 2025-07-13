@@ -14,6 +14,7 @@ export interface Notification {
   description: string;
   timestamp: string;
   read: boolean;
+  forAdmin?: boolean;
 }
 
 export default function NotificationsPage() {

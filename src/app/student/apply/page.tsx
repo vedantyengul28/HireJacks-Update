@@ -117,7 +117,8 @@ export default function ApplyJobsPage() {
   
   const addNotification = (newNotification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
     try {
-        const existingNotifications: Notification[] = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const key = newNotification.forAdmin ? 'adminNotifications' : 'notifications';
+        const existingNotifications: Notification[] = JSON.parse(localStorage.getItem(key) || '[]');
         const notification: Notification = {
             ...newNotification,
             id: new Date().toISOString(),
@@ -125,7 +126,7 @@ export default function ApplyJobsPage() {
             read: false,
         };
         const updatedNotifications = [...existingNotifications, notification];
-        localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+        localStorage.setItem(key, JSON.stringify(updatedNotifications));
     } catch (error) {
         console.error("Failed to add notification:", error);
     }
@@ -156,6 +157,11 @@ export default function ApplyJobsPage() {
         title: "Application Sent!",
         description: `You successfully applied for the ${job.title} position at ${job.organization}.`
        });
+       addNotification({
+        title: 'New Application!',
+        description: `${userProfile.data.firstName || 'A student'} applied for "${job.title}".`,
+        forAdmin: true,
+       });
     }
   };
 
@@ -185,4 +191,11 @@ export default function ApplyJobsPage() {
       </Card>
     </div>
   );
+}
+
+// Add forAdmin to Notification interface
+declare module './page' {
+    interface Notification {
+        forAdmin?: boolean;
+    }
 }

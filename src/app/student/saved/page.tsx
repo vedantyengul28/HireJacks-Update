@@ -9,6 +9,7 @@ import { Star, MapPin, Trash2, Check } from 'lucide-react';
 import { type Job } from '@/lib/sample-data';
 import { useToast } from '@/hooks/use-toast';
 import BackButton from '@/components/ui/back-button';
+import type { Notification } from '../notifications/page';
 
 function SavedJobCard({ job, onRemove, onApply, isApplied }: { job: Job, onRemove: (jobId: number) => void, onApply: (jobId: number) => void, isApplied: boolean }) {
 
@@ -84,6 +85,23 @@ export default function SavedJobsPage() {
         description: "The job has been removed from your saved list."
     });
   }
+  
+  const addNotification = (newNotification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+    try {
+        const key = newNotification.forAdmin ? 'adminNotifications' : 'notifications';
+        const existingNotifications: Notification[] = JSON.parse(localStorage.getItem(key) || '[]');
+        const notification: Notification = {
+            ...newNotification,
+            id: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
+            read: false,
+        };
+        const updatedNotifications = [...existingNotifications, notification];
+        localStorage.setItem(key, JSON.stringify(updatedNotifications));
+    } catch (error) {
+        console.error("Failed to add notification:", error);
+    }
+  };
 
   const handleApply = (jobId: number) => {
     const updatedAppliedJobs = [...appliedJobs, jobId];
@@ -105,6 +123,15 @@ export default function SavedJobsPage() {
         toast({
             title: "Application Sent!",
             description: `You successfully applied for the ${job.title} position at ${job.organization}.`
+        });
+        addNotification({
+            title: "Application Sent!",
+            description: `You applied for ${job.title} at ${job.organization}.`
+        });
+        addNotification({
+            title: 'New Application!',
+            description: `${userProfile.data.firstName || 'A student'} applied for "${job.title}".`,
+            forAdmin: true
         });
     }
   };
@@ -142,4 +169,10 @@ export default function SavedJobsPage() {
       </Card>
     </div>
   );
+}
+
+declare module '../notifications/page' {
+    interface Notification {
+        forAdmin?: boolean;
+    }
 }

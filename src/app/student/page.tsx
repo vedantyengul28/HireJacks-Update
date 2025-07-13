@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import type { Notification } from './notifications/page';
 
 const TOTAL_FIELDS = 7; // firstName, lastName, email, headline, summary, resume, photo
 
@@ -226,17 +227,18 @@ function RecentJobsFeed() {
     setSavedJobs(updatedSavedJobs.map(p => p.id));
   };
   
-   const addNotification = (newNotification: {title: string; description: string;}) => {
+   const addNotification = (newNotification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
     try {
-        const existingNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-        const notification = {
+        const key = newNotification.forAdmin ? 'adminNotifications' : 'notifications';
+        const existingNotifications: Notification[] = JSON.parse(localStorage.getItem(key) || '[]');
+        const notification: Notification = {
             ...newNotification,
             id: new Date().toISOString(),
             timestamp: new Date().toISOString(),
             read: false,
         };
         const updatedNotifications = [...existingNotifications, notification];
-        localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+        localStorage.setItem(key, JSON.stringify(updatedNotifications));
     } catch (error) {
         console.error("Failed to add notification:", error);
     }
@@ -266,6 +268,11 @@ function RecentJobsFeed() {
         addNotification({
             title: "Application Sent!",
             description: `You applied for ${job.title} at ${job.organization}.`
+        });
+        addNotification({
+            title: 'New Application!',
+            description: `${userProfile.data.firstName || 'A student'} applied for "${job.title}".`,
+            forAdmin: true
         });
     }
   };
@@ -304,4 +311,10 @@ export default function StudentPage() {
       <RecentJobsFeed />
     </div>
   );
+}
+
+declare module './notifications/page' {
+    interface Notification {
+        forAdmin?: boolean;
+    }
 }

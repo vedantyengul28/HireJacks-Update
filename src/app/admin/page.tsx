@@ -14,6 +14,8 @@ import { sampleJobs, type Job } from '@/lib/sample-data';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import BackButton from '@/components/ui/back-button';
+import type { Notification } from '../student/notifications/page';
+
 
 export default function AdminPage() {
   const { toast } = useToast();
@@ -70,6 +72,22 @@ export default function AdminPage() {
     setEditingJob(null);
     setShowForm(false);
   }
+  
+  const addNotification = (newNotification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+    try {
+        const existingNotifications: Notification[] = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const notification: Notification = {
+            ...newNotification,
+            id: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
+            read: false,
+        };
+        const updatedNotifications = [...existingNotifications, notification];
+        localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+    } catch (error) {
+        console.error("Failed to add notification:", error);
+    }
+  };
 
   const handlePostJob = (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +117,10 @@ export default function AdminPage() {
         };
         allJobs.push(newJob);
         toast({ title: 'Job Posted!', description: `${newJob.title} at ${newJob.organization} is now live.` });
+        addNotification({
+            title: 'New Job Posted!',
+            description: `A new job "${newJob.title}" from ${newJob.organization} is available.`
+        });
     }
 
     localStorage.setItem('allJobs', JSON.stringify(allJobs));

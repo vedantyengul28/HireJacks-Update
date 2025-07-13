@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Briefcase, User, Bookmark, Settings, MessageSquare, Menu, Bot } from 'lucide-react';
+import { Home, Briefcase, User, Bookmark, Settings, MessageSquare, Menu, Bot, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -27,6 +27,7 @@ const sidebarNavItems = [
     { href: '/student', icon: Home, label: 'Home' },
     { href: '/student/search', icon: Bot, label: 'AI Job Search' },
     { href: '/student/profile', icon: User, label: 'Resume Builder AI' },
+    { href: '/student/notifications', icon: Bell, label: 'Notifications' },
     { href: '/student/saved', icon: Bookmark, label: 'Saved Jobs' },
     { href: '/student/settings', icon: Settings, label: 'Settings' },
     { href: '/student/feedback', icon: MessageSquare, label: 'Feedback' },
