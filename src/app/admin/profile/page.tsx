@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Edit, Check } from 'lucide-react';
+import { User, Edit, Check, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BackButton from '@/components/ui/back-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ProfileData {
   name: string;
@@ -20,6 +21,7 @@ interface ProfileData {
 export default function AdminProfilePage() {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const [profileData, setProfileData] = useState<ProfileData>({
     name: '',
@@ -32,13 +34,17 @@ export default function AdminProfilePage() {
         const storedProfile = localStorage.getItem('adminProfile');
         if (storedProfile) {
           const { data } = JSON.parse(storedProfile);
-          setProfileData(data);
+          if (data) {
+            setProfileData(data);
+          }
         } else {
           setIsEditing(true);
         }
     } catch(e) {
         console.error(e)
         setIsEditing(true);
+    } finally {
+        setLoading(false);
     }
   }, []);
 
@@ -93,7 +99,7 @@ export default function AdminProfilePage() {
                 <CardDescription>Manage your personal and company information.</CardDescription>
               </div>
             </div>
-            {!isEditing && (
+            {!isEditing && !loading && (
               <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                 <Edit className="mr-2 h-4 w-4" />
                 Edit Profile
@@ -102,48 +108,70 @@ export default function AdminProfilePage() {
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSave} className="space-y-6">
-            <div className="flex justify-center">
-                <Avatar className="h-32 w-32" >
-                    <AvatarFallback>
-                        <span className="text-4xl">
-                            <User />
-                        </span>
-                    </AvatarFallback>
-                </Avatar>
+          {loading ? (
+             <div className="space-y-6">
+                <div className="flex justify-center">
+                    <Skeleton className="h-32 w-32 rounded-full" />
+                </div>
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-6 w-full" />
+                    </div>
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-6 w-full" />
+                    </div>
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-28" />
+                        <Skeleton className="h-6 w-full" />
+                    </div>
+                </div>
             </div>
+          ) : (
+            <form onSubmit={handleSave} className="space-y-6">
+              <div className="flex justify-center">
+                  <Avatar className="h-32 w-32" >
+                      <AvatarFallback>
+                          <span className="text-4xl">
+                              <User />
+                          </span>
+                      </AvatarFallback>
+                  </Avatar>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              {isEditing ? (
-                <Input id="name" placeholder="John Doe" value={profileData.name} onChange={handleInputChange} />
-              ) : (
-                <p className="font-medium pt-2">{profileData.name || 'Not set'}</p>
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                {isEditing ? (
+                  <Input id="name" placeholder="John Doe" value={profileData.name} onChange={handleInputChange} />
+                ) : (
+                  <p className="font-medium pt-2">{profileData.name || 'Not set'}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="organization">Organization Name</Label>
+                {isEditing ? (
+                  <Input id="organization" placeholder="TechCorp" value={profileData.organization} onChange={handleInputChange} />
+                ) : (
+                  <p className="font-medium pt-2">{profileData.organization || 'Not set'}</p>
+                )}
+              </div>
+
+               <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <p className="font-medium pt-2 text-muted-foreground">{profileData.email || 'Not set'}</p>
+                {isEditing && <p className="text-xs text-muted-foreground">Email address cannot be changed.</p>}
+              </div>
+
+              {isEditing && (
+                <Button type="submit" className="w-full">
+                  <Check className="mr-2 h-4 w-4" />
+                  Save Changes
+                </Button>
               )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="organization">Organization Name</Label>
-              {isEditing ? (
-                <Input id="organization" placeholder="TechCorp" value={profileData.organization} onChange={handleInputChange} />
-              ) : (
-                <p className="font-medium pt-2">{profileData.organization || 'Not set'}</p>
-              )}
-            </div>
-
-             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <p className="font-medium pt-2 text-muted-foreground">{profileData.email || 'Not set'}</p>
-              {isEditing && <p className="text-xs text-muted-foreground">Email address cannot be changed.</p>}
-            </div>
-
-            {isEditing && (
-              <Button type="submit" className="w-full">
-                <Check className="mr-2 h-4 w-4" />
-                Save Changes
-              </Button>
-            )}
-          </form>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>
