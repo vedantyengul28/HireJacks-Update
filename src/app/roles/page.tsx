@@ -27,7 +27,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 
 const sidebarLinks = [
-  { icon: Search, label: 'Search jobs', href: '/job-seeker/search' },
+  { icon: Search, label: 'Search projects', href: '/student/search' },
   { icon: MessageSquare, label: 'Chat for help', href: '#' },
   { icon: Eye, label: 'Display preferences', href: '#' },
   { icon: BookOpen, label: 'HireJacks blog', href: '#' },
@@ -48,7 +48,7 @@ function Sidebar() {
           <div>
             <h2 className="text-lg font-semibold">Build your profile</h2>
             <p className="text-sm text-muted-foreground">
-              Job opportunities are waiting for you.
+              Project opportunities are waiting for you.
             </p>
           </div>
         </div>
@@ -108,33 +108,33 @@ export default function RoleSelectionPage() {
             Choose Your Role
           </h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-            Your next career move or top talent is just a click away.
+            Your next opportunity or top talent is just a click away.
             Select your path to get started.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
-          <Link href="/job-seeker/login">
+          <Link href="/student/login">
             <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-primary/50">
               <CardHeader className="flex flex-col items-center justify-center text-center p-8">
                 <div className="p-4 bg-primary/10 rounded-full mb-4">
-                  <Briefcase className="h-12 w-12 text-primary" />
+                  <User className="h-12 w-12 text-primary" />
                 </div>
-                <CardTitle className="text-2xl font-semibold">Job Seeker</CardTitle>
+                <CardTitle className="text-2xl font-semibold">Student</CardTitle>
                 <CardDescription className="mt-2 text-base">
-                  Find jobs, get AI-powered suggestions, and build your career.
+                  Find projects, get AI-powered suggestions, and build your career.
                 </CardDescription>
               </CardHeader>
             </Card>
           </Link>
-          <Link href="/recruiter/login">
+          <Link href="/admin/login">
             <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-accent/50">
               <CardHeader className="flex flex-col items-center justify-center text-center p-8">
                 <div className="p-4 bg-accent/10 rounded-full mb-4">
                   <UserSearch className="h-12 w-12 text-accent" />
                 </div>
-                <CardTitle className="text-2xl font-semibold">Recruiter</CardTitle>
+                <CardTitle className="text-2xl font-semibold">Admin</CardTitle>
                 <CardDescription className="mt-2 text-base">
-                  Post jobs, manage applicants, and find the perfect candidate.
+                  Post projects, manage applicants, and find the perfect candidate.
                 </CardDescription>
               </CardHeader>
             </Card>

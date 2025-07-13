@@ -18,14 +18,14 @@ import { Briefcase } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 
-export default function RecruiterAuthPage() {
+export default function AdminAuthPage() {
   const router = useRouter();
   const { toast } = useToast();
   
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
-  const [signupCompany, setSignupCompany] = useState('');
+  const [signupOrganization, setSignupOrganization] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
 
@@ -41,13 +41,13 @@ export default function RecruiterAuthPage() {
     }
     
     try {
-        const recruiters = JSON.parse(localStorage.getItem('recruiterUsers') || '[]');
-        const recruiter = recruiters.find((r: any) => r.email === loginEmail && r.password === loginPassword);
+        const admins = JSON.parse(localStorage.getItem('adminUsers') || '[]');
+        const admin = admins.find((r: any) => r.email === loginEmail && r.password === loginPassword);
 
-        if (recruiter) {
-             // You can also store recruiter-specific info if needed
-            localStorage.setItem('recruiterProfile', JSON.stringify({ company: recruiter.company, email: recruiter.email }));
-            router.push('/recruiter');
+        if (admin) {
+             // You can also store admin-specific info if needed
+            localStorage.setItem('adminProfile', JSON.stringify({ organization: admin.organization, email: admin.email }));
+            router.push('/admin');
         } else {
              toast({
                 variant: "destructive",
@@ -67,7 +67,7 @@ export default function RecruiterAuthPage() {
 
   const handleSignup = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (!signupCompany || !signupEmail || !signupPassword) {
+    if (!signupOrganization || !signupEmail || !signupPassword) {
       toast({
         variant: "destructive",
         title: "Signup Failed",
@@ -77,10 +77,10 @@ export default function RecruiterAuthPage() {
     }
 
     try {
-        const recruiters = JSON.parse(localStorage.getItem('recruiterUsers') || '[]');
-        const existingRecruiter = recruiters.find((r: any) => r.email === signupEmail);
+        const admins = JSON.parse(localStorage.getItem('adminUsers') || '[]');
+        const existingAdmin = admins.find((r: any) => r.email === signupEmail);
 
-        if (existingRecruiter) {
+        if (existingAdmin) {
             toast({
                 variant: "destructive",
                 title: "Signup Failed",
@@ -89,18 +89,18 @@ export default function RecruiterAuthPage() {
             return;
         }
 
-        const newRecruiter = { company: signupCompany, email: signupEmail, password: signupPassword };
-        recruiters.push(newRecruiter);
-        localStorage.setItem('recruiterUsers', JSON.stringify(recruiters));
+        const newAdmin = { organization: signupOrganization, email: signupEmail, password: signupPassword };
+        admins.push(newAdmin);
+        localStorage.setItem('adminUsers', JSON.stringify(admins));
         
-        localStorage.setItem('recruiterProfile', JSON.stringify({ company: newRecruiter.company, email: newRecruiter.email }));
+        localStorage.setItem('adminProfile', JSON.stringify({ organization: newAdmin.organization, email: newAdmin.email }));
 
         toast({
             title: "Account Created!",
-            description: "Your recruiter account has been successfully created.",
+            description: "Your admin account has been successfully created.",
         });
 
-        router.push('/recruiter');
+        router.push('/admin');
     } catch (error) {
         console.error(error);
         toast({
@@ -125,15 +125,15 @@ export default function RecruiterAuthPage() {
         <TabsContent value="login">
           <Card>
             <CardHeader>
-              <CardTitle>Recruiter Login</CardTitle>
+              <CardTitle>Admin Login</CardTitle>
               <CardDescription>
-                Sign in to manage your job postings.
+                Sign in to manage your project postings.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="recruiter@company.com" required value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
+                <Input id="email" type="email" placeholder="admin@organization.com" required value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
@@ -146,19 +146,19 @@ export default function RecruiterAuthPage() {
         <TabsContent value="signup">
           <Card>
             <CardHeader>
-              <CardTitle>Create Recruiter Account</CardTitle>
+              <CardTitle>Create Admin Account</CardTitle>
               <CardDescription>
                 Join HireJacks to find the best talent.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Company Name</Label>
-                <Input id="name" type="text" placeholder="Your Company Inc." required value={signupCompany} onChange={(e) => setSignupCompany(e.target.value)} />
+                <Label htmlFor="name">Organization Name</Label>
+                <Input id="name" type="text" placeholder="Your Organization Inc." required value={signupOrganization} onChange={(e) => setSignupOrganization(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-email">Email</Label>
-                <Input id="signup-email" type="email" placeholder="recruiter@company.com" required value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} />
+                <Input id="signup-email" type="email" placeholder="admin@organization.com" required value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-password">Password</Label>

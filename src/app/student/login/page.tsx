@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Briefcase } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-export default function JobSeekerAuthPage() {
+export default function StudentAuthPage() {
   const router = useRouter();
   const { toast } = useToast();
   
@@ -40,7 +40,7 @@ export default function JobSeekerAuthPage() {
     }
     
     try {
-        const users = JSON.parse(localStorage.getItem('jobSeekerUsers') || '[]');
+        const users = JSON.parse(localStorage.getItem('studentUsers') || '[]');
         const user = users.find((u: any) => u.email === loginEmail && u.password === loginPassword);
 
         if (user) {
@@ -59,7 +59,7 @@ export default function JobSeekerAuthPage() {
               timestamp: new Date().toISOString()
             };
             localStorage.setItem('userProfile', JSON.stringify(profileToStore));
-            router.push('/job-seeker/profile');
+            router.push('/student/profile');
         } else {
             toast({
                 variant: "destructive",
@@ -89,7 +89,7 @@ export default function JobSeekerAuthPage() {
     }
 
     try {
-        const users = JSON.parse(localStorage.getItem('jobSeekerUsers') || '[]');
+        const users = JSON.parse(localStorage.getItem('studentUsers') || '[]');
         const existingUser = users.find((u: any) => u.email === signupEmail);
         
         if (existingUser) {
@@ -103,7 +103,7 @@ export default function JobSeekerAuthPage() {
 
         const newUser = { name: signupName, email: signupEmail, password: signupPassword };
         users.push(newUser);
-        localStorage.setItem('jobSeekerUsers', JSON.stringify(users));
+        localStorage.setItem('studentUsers', JSON.stringify(users));
 
         const [firstName, lastName] = signupName.split(' ');
         const profileToStore = {
@@ -117,7 +117,7 @@ export default function JobSeekerAuthPage() {
             description: "You have been successfully signed up.",
         });
         
-        router.push('/job-seeker/profile');
+        router.push('/student/profile');
     } catch (error) {
         console.error(error);
         toast({
@@ -145,7 +145,7 @@ export default function JobSeekerAuthPage() {
               <CardHeader>
                 <CardTitle>Welcome Back</CardTitle>
                 <CardDescription>
-                  Sign in to continue your job search.
+                  Sign in to continue your project search.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -166,7 +166,7 @@ export default function JobSeekerAuthPage() {
               <CardHeader>
                 <CardTitle>Create an Account</CardTitle>
                 <CardDescription>
-                  Join HireJacks to find your dream job.
+                  Join HireJacks to find your dream project.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

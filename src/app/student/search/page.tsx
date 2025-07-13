@@ -6,39 +6,39 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Briefcase, MapPin, Search as SearchIcon, Code, Bookmark, Check } from 'lucide-react';
-import { sampleJobs, type Job } from '@/lib/sample-data';
+import { sampleProjects, type Project } from '@/lib/sample-data';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import BackButton from '@/components/ui/back-button';
 
-function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; }) {
+function ProjectCard({ project, onSave, onApply, isApplied }: { project: Project; onSave: (project: Project) => void; onApply: (projectId: number) => void; isApplied: boolean; }) {
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>
-                 <CardTitle className="text-lg">{job.title}</CardTitle>
-                <CardDescription className="font-medium text-primary">{job.company}</CardDescription>
+                 <CardTitle className="text-lg">{project.title}</CardTitle>
+                <CardDescription className="font-medium text-primary">{project.organization}</CardDescription>
             </div>
-            <Badge variant={job.type === 'Full-time' ? 'default' : 'secondary'}>{job.type}</Badge>
+            <Badge variant={project.type === 'Full-time' ? 'default' : 'secondary'}>{project.type}</Badge>
         </div>
         <div className="flex items-center text-sm text-muted-foreground pt-2">
           <MapPin className="h-4 w-4 mr-2" />
-          <span>{job.location}</span>
+          <span>{project.location}</span>
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{job.description}</p>
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{project.description}</p>
         <div className="flex flex-wrap gap-2 mb-4">
-            {job.skills.map(skill => <Badge variant="outline" key={skill}>{skill}</Badge>)}
+            {project.skills.map(skill => <Badge variant="outline" key={skill}>{skill}</Badge>)}
         </div>
         <div className="flex justify-between items-center">
-             <p className="text-sm font-semibold">{job.salary}</p>
+             <p className="text-sm font-semibold">{project.salary}</p>
              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => onSave(job)}>
+                <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => onSave(project)}>
                     <Bookmark className="h-4 w-4" />
-                    <span className="sr-only">Save Job</span>
+                    <span className="sr-only">Save Project</span>
                 </Button>
                 {isApplied ? (
                     <Button size="sm" disabled>
@@ -46,7 +46,7 @@ function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: 
                         Applied
                     </Button>
                 ) : (
-                    <Button size="sm" onClick={() => onApply(job.id)}>Apply Now</Button>
+                    <Button size="sm" onClick={() => onApply(project.id)}>Apply Now</Button>
                 )}
             </div>
         </div>
@@ -56,32 +56,32 @@ function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: 
 }
 
 
-export default function JobSearchPage() {
+export default function ProjectSearchPage() {
   const { toast } = useToast();
   const [filters, setFilters] = useState({
     keyword: '',
     location: '',
     skills: '',
   });
-  const [allJobs, setAllJobs] = useState<Job[]>([]);
-  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
-  const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const [appliedProjects, setAppliedProjects] = useState<number[]>([]);
 
   useEffect(() => {
     try {
-        const storedJobs = localStorage.getItem('allJobs');
-        const jobs = storedJobs ? JSON.parse(storedJobs) : sampleJobs;
-        setAllJobs(jobs);
-        setFilteredJobs(jobs.slice().reverse()); // Show newest first
+        const storedProjects = localStorage.getItem('allProjects');
+        const projects = storedProjects ? JSON.parse(storedProjects) : sampleProjects;
+        setAllProjects(projects);
+        setFilteredProjects(projects.slice().reverse()); // Show newest first
         
-        const storedAppliedJobs = localStorage.getItem('appliedJobs');
-        if (storedAppliedJobs) {
-          setAppliedJobs(JSON.parse(storedAppliedJobs));
+        const storedAppliedProjects = localStorage.getItem('appliedProjects');
+        if (storedAppliedProjects) {
+          setAppliedProjects(JSON.parse(storedAppliedProjects));
         }
     } catch(error) {
         console.error("Error accessing localStorage:", error);
-        setAllJobs(sampleJobs);
-        setFilteredJobs(sampleJobs.slice().reverse());
+        setAllProjects(sampleProjects);
+        setFilteredProjects(sampleProjects.slice().reverse());
     }
   }, []);
   
@@ -97,68 +97,68 @@ export default function JobSearchPage() {
     const lowercasedLocation = filters.location.toLowerCase();
     const lowercasedSkills = filters.skills.toLowerCase().split(',').map(s => s.trim()).filter(s => s);
 
-    const results = allJobs.filter((job: Job) => {
-      const titleMatch = job.title.toLowerCase().includes(lowercasedKeyword);
-      const companyMatch = job.company.toLowerCase().includes(lowercasedKeyword);
-      const descriptionMatch = job.description.toLowerCase().includes(lowercasedKeyword);
-      const keywordMatch = titleMatch || companyMatch || descriptionMatch;
+    const results = allProjects.filter((project: Project) => {
+      const titleMatch = project.title.toLowerCase().includes(lowercasedKeyword);
+      const organizationMatch = project.organization.toLowerCase().includes(lowercasedKeyword);
+      const descriptionMatch = project.description.toLowerCase().includes(lowercasedKeyword);
+      const keywordMatch = titleMatch || organizationMatch || descriptionMatch;
 
-      const locationMatch = job.location.toLowerCase().includes(lowercasedLocation);
+      const locationMatch = project.location.toLowerCase().includes(lowercasedLocation);
 
       const skillsMatch = lowercasedSkills.length === 0 || lowercasedSkills.every(skill => 
-        job.skills.some(jobSkill => jobSkill.toLowerCase().includes(skill))
+        project.skills.some(projectSkill => projectSkill.toLowerCase().includes(skill))
       );
 
       return keywordMatch && locationMatch && skillsMatch;
     });
 
-    setFilteredJobs(results.slice().reverse());
+    setFilteredProjects(results.slice().reverse());
   };
   
-  const handleSaveJob = (jobToSave: Job) => {
-    let savedJobs: Job[] = [];
+  const handleSaveProject = (projectToSave: Project) => {
+    let savedProjects: Project[] = [];
     try {
-      savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+      savedProjects = JSON.parse(localStorage.getItem('savedProjects') || '[]');
     } catch (e) {
       console.error(e)
     }
 
-    const isAlreadySaved = savedJobs.some(job => job.id === jobToSave.id);
+    const isAlreadySaved = savedProjects.some(project => project.id === projectToSave.id);
     if (!isAlreadySaved) {
-        localStorage.setItem('savedJobs', JSON.stringify([...savedJobs, jobToSave]));
+        localStorage.setItem('savedProjects', JSON.stringify([...savedProjects, projectToSave]));
         toast({
-            title: "Job Saved!",
-            description: `${jobToSave.title} at ${jobToSave.company} has been saved.`
+            title: "Project Saved!",
+            description: `${projectToSave.title} at ${projectToSave.organization} has been saved.`
         });
     } else {
         toast({
             variant: "default",
             title: "Already Saved",
-            description: `This job is already in your saved list.`
+            description: `This project is already in your saved list.`
         });
     }
   };
 
-  const handleApply = (jobId: number) => {
-    const updatedAppliedJobs = [...appliedJobs, jobId];
-    setAppliedJobs(updatedAppliedJobs);
-    localStorage.setItem('appliedJobs', JSON.stringify(updatedAppliedJobs));
+  const handleApply = (projectId: number) => {
+    const updatedAppliedProjects = [...appliedProjects, projectId];
+    setAppliedProjects(updatedAppliedProjects);
+    localStorage.setItem('appliedProjects', JSON.stringify(updatedAppliedProjects));
 
     const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
     const applications = JSON.parse(localStorage.getItem('applications') || '[]');
     
-    const hasAlreadyApplied = applications.some((app: any) => app.jobId === jobId && app.applicantProfile.data.email === userProfile.data.email);
+    const hasAlreadyApplied = applications.some((app: any) => app.projectId === projectId && app.applicantProfile.data.email === userProfile.data.email);
 
     if (!hasAlreadyApplied) {
-      applications.push({ jobId, applicantProfile: userProfile });
+      applications.push({ projectId, applicantProfile: userProfile });
       localStorage.setItem('applications', JSON.stringify(applications));
     }
     
-    const job = allJobs.find(j => j.id === jobId);
-    if (job) {
+    const project = allProjects.find(p => p.id === projectId);
+    if (project) {
         toast({
             title: "Application Sent!",
-            description: `You successfully applied for the ${job.title} position at ${job.company}.`
+            description: `You successfully applied for the ${project.title} position at ${project.organization}.`
         });
     }
   };
@@ -169,8 +169,8 @@ export default function JobSearchPage() {
       <BackButton />
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Find Your Dream Job</CardTitle>
-          <CardDescription>Search for jobs based on your skills and preferences.</CardDescription>
+          <CardTitle>Find Your Dream Project</CardTitle>
+          <CardDescription>Search for projects based on your skills and preferences.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSearch} className="grid sm:grid-cols-3 gap-4 items-end">
@@ -197,7 +197,7 @@ export default function JobSearchPage() {
             </div>
             <Button type="submit" className="sm:col-span-3">
               <SearchIcon className="mr-2 h-4 w-4" />
-              Search Jobs
+              Search Projects
             </Button>
           </form>
         </CardContent>
@@ -205,15 +205,15 @@ export default function JobSearchPage() {
       
       <div className="space-y-6">
          <h2 className="text-2xl font-bold tracking-tight">
-            {filteredJobs.length} Job Openings
+            {filteredProjects.length} Project Openings
         </h2>
-        {filteredJobs.length > 0 ? (
-          filteredJobs.map(job => (
-            <JobCard key={job.id} job={job} onSave={handleSaveJob} onApply={handleApply} isApplied={appliedJobs.includes(job.id)} />
+        {filteredProjects.length > 0 ? (
+          filteredProjects.map(project => (
+            <ProjectCard key={project.id} project={project} onSave={handleSaveProject} onApply={handleApply} isApplied={appliedProjects.includes(project.id)} />
           ))
         ) : (
           <div className="text-center py-16">
-            <p className="text-lg text-muted-foreground">No jobs found matching your criteria.</p>
+            <p className="text-lg text-muted-foreground">No projects found matching your criteria.</p>
           </div>
         )}
       </div>

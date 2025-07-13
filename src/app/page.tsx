@@ -18,7 +18,7 @@ import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, S
 
 const sidebarLinks = [
   { href: '/roles', label: 'Get Started' },
-  { href: '/job-seeker/search', label: 'Search Jobs' },
+  { href: '/student/search', label: 'Search Projects' },
   { href: '#', label: 'How HireJacks Works' },
   { href: '#', label: 'About Us' },
 ];
@@ -78,11 +78,11 @@ export default function IntroductionPage() {
               Welcome to HireJacks
             </h1>
             <p className="max-w-2xl text-lg sm:text-xl text-muted-foreground">
-              The seamless platform to connect skilled professionals with innovative companies. Your next opportunity is just a click away.
+              The seamless platform to connect skilled students with innovative organizations. Your next opportunity is just a click away.
             </p>
             <Image
                 src="https://placehold.co/600x400.png"
-                alt="Handshake between a recruiter and a job seeker"
+                alt="Handshake between an admin and a student"
                 width={600}
                 height={400}
                 className="rounded-lg shadow-2xl"

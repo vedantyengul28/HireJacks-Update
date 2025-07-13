@@ -17,19 +17,19 @@ interface ProfileInfo {
 }
 
 const mobileNavItems = [
-    { href: '/job-seeker', icon: Home, label: 'Home' },
-    { href: '/job-seeker/apply', icon: Briefcase, label: 'Apply' },
-    { href: '/job-seeker/saved', icon: Bookmark, label: 'Saved' },
-    { href: '/job-seeker/profile', icon: User, label: 'Profile' },
+    { href: '/student', icon: Home, label: 'Home' },
+    { href: '/student/apply', icon: Briefcase, label: 'Apply' },
+    { href: '/student/saved', icon: Bookmark, label: 'Saved' },
+    { href: '/student/profile', icon: User, label: 'Profile' },
 ];
 
 const sidebarNavItems = [
-    { href: '/job-seeker', icon: Home, label: 'Home' },
-    { href: '/job-seeker/search', icon: Bot, label: 'AI Job Recommendation' },
-    { href: '/job-seeker/profile', icon: User, label: 'Resume Builder AI' },
-    { href: '/job-seeker/saved', icon: Bookmark, label: 'Saved Jobs' },
-    { href: '/job-seeker/settings', icon: Settings, label: 'Settings' },
-    { href: '/job-seeker/feedback', icon: MessageSquare, label: 'Feedback' },
+    { href: '/student', icon: Home, label: 'Home' },
+    { href: '/student/search', icon: Bot, label: 'AI Project Recommendation' },
+    { href: '/student/profile', icon: User, label: 'Resume Builder AI' },
+    { href: '/student/saved', icon: Bookmark, label: 'Saved Projects' },
+    { href: '/student/settings', icon: Settings, label: 'Settings' },
+    { href: '/student/feedback', icon: MessageSquare, label: 'Feedback' },
 ];
 
 
@@ -62,7 +62,7 @@ function SidebarContent() {
                     </Avatar>
                     <div>
                         <p className="font-semibold text-lg">{profile.name}</p>
-                        <p className="text-sm text-muted-foreground">Job Seeker</p>
+                        <p className="text-sm text-muted-foreground">Student</p>
                     </div>
                 </div>
             </div>
@@ -87,7 +87,7 @@ function SidebarContent() {
 }
 
 
-export default function JobSeekerLayout({
+export default function StudentLayout({
   children,
 }: {
   children: React.ReactNode;

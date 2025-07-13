@@ -1,12 +1,12 @@
 
 'use client';
 
-import { handleSuggestJobs } from '@/app/actions';
+import { handleSuggestProjects } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { sampleJobs, type Job } from '@/lib/sample-data';
+import { sampleProjects, type Project } from '@/lib/sample-data';
 import { ArrowUp, Briefcase, Loader2, MapPin, Bookmark, Check } from 'lucide-react';
 import { useEffect, useState, useActionState, useTransition } from 'react';
 import Link from 'next/link';
@@ -83,7 +83,7 @@ function ProfileCompletionCard() {
                                 {lastUpdated ? `Updated ${lastUpdated}` : 'Not updated yet'}
                             </p>
                              {missingDetails > 0 && (
-                                <Link href="/job-seeker/profile" className="text-sm text-primary font-medium">
+                                <Link href="/student/profile" className="text-sm text-primary font-medium">
                                     {missingDetails} missing detail{missingDetails > 1 ? 's' : ''}
                                 </Link>
                              )}
@@ -102,9 +102,9 @@ function ProfileCompletionCard() {
                             <ArrowUp className="h-4 w-4"/>
                             Boost 2%
                         </p>
-                        <p className="text-xs text-muted-foreground">Personal details help recruiters know more about you.</p>
+                        <p className="text-xs text-muted-foreground">Personal details help admins know more about you.</p>
                      </div>
-                     <Link href="/job-seeker/profile">
+                     <Link href="/student/profile">
                         <Button variant="outline" size="sm">Add Details</Button>
                      </Link>
                 </div>
@@ -113,33 +113,33 @@ function ProfileCompletionCard() {
     );
 }
 
-function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; }) {
+function ProjectCard({ project, onSave, onApply, isApplied }: { project: Project; onSave: (project: Project) => void; onApply: (projectId: number) => void; isApplied: boolean; }) {
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>
-                 <CardTitle className="text-lg">{job.title}</CardTitle>
-                <CardDescription className="font-medium text-primary">{job.company}</CardDescription>
+                 <CardTitle className="text-lg">{project.title}</CardTitle>
+                <CardDescription className="font-medium text-primary">{project.organization}</CardDescription>
             </div>
-            <Badge variant={job.type === 'Full-time' ? 'default' : 'secondary'}>{job.type}</Badge>
+            <Badge variant={project.type === 'Full-time' ? 'default' : 'secondary'}>{project.type}</Badge>
         </div>
         <div className="flex items-center text-sm text-muted-foreground pt-2">
           <MapPin className="h-4 w-4 mr-2" />
-          <span>{job.location}</span>
+          <span>{project.location}</span>
         </div>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2 mb-4">
-            {job.skills.map(skill => <Badge variant="outline" key={skill}>{skill}</Badge>)}
+            {project.skills.map(skill => <Badge variant="outline" key={skill}>{skill}</Badge>)}
         </div>
         <div className="flex justify-between items-center">
-             <p className="text-sm font-semibold">{job.salary}</p>
+             <p className="text-sm font-semibold">{project.salary}</p>
              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => onSave(job)}>
+                <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => onSave(project)}>
                     <Bookmark className="h-4 w-4" />
-                    <span className="sr-only">Save Job</span>
+                    <span className="sr-only">Save Project</span>
                 </Button>
                 {isApplied ? (
                     <Button size="sm" disabled>
@@ -147,7 +147,7 @@ function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: 
                         Applied
                     </Button>
                 ) : (
-                    <Button size="sm" onClick={() => onApply(job.id)}>Apply Now</Button>
+                    <Button size="sm" onClick={() => onApply(project.id)}>Apply Now</Button>
                 )}
             </div>
         </div>
@@ -156,34 +156,34 @@ function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: 
   );
 }
 
-function AiJobFeed() {
+function AiProjectFeed() {
   const [isPending, startTransition] = useTransition();
-  const [state, formAction] = useActionState(handleSuggestJobs, { message: '', jobs: [] });
+  const [state, formAction] = useActionState(handleSuggestProjects, { message: '', projects: [] });
   const [submitted, setSubmitted] = useState(false);
-  const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
+  const [appliedProjects, setAppliedProjects] = useState<number[]>([]);
   const { toast } = useToast();
-  const [allJobs, setAllJobs] = useState<Job[]>([]);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
 
   const profileSummary = "Experienced frontend developer proficient in React, TypeScript, and Next.js. Passionate about building accessible user interfaces and working with modern web technologies. Skilled in state management with Redux and Zustand, and building design systems with Tailwind CSS.";
 
   useEffect(() => {
     try {
-        const storedJobs = localStorage.getItem('allJobs');
-        if (storedJobs) {
-            setAllJobs(JSON.parse(storedJobs));
+        const storedProjects = localStorage.getItem('allProjects');
+        if (storedProjects) {
+            setAllProjects(JSON.parse(storedProjects));
         } else {
-            const initialJobs = sampleJobs;
-            setAllJobs(initialJobs);
-            localStorage.setItem('allJobs', JSON.stringify(initialJobs));
+            const initialProjects = sampleProjects;
+            setAllProjects(initialProjects);
+            localStorage.setItem('allProjects', JSON.stringify(initialProjects));
         }
 
-        const storedAppliedJobs = localStorage.getItem('appliedJobs');
-        if(storedAppliedJobs) {
-            setAppliedJobs(JSON.parse(storedAppliedJobs));
+        const storedAppliedProjects = localStorage.getItem('appliedProjects');
+        if(storedAppliedProjects) {
+            setAppliedProjects(JSON.parse(storedAppliedProjects));
         }
     } catch (error) {
         console.error("Error accessing localStorage:", error);
-        setAllJobs(sampleJobs);
+        setAllProjects(sampleProjects);
     }
   }, []);
 
@@ -198,59 +198,59 @@ function AiJobFeed() {
     }
   }, [submitted, formAction, profileSummary]);
 
-  const handleSaveJob = (jobToSave: Job) => {
-    const savedJobs: Job[] = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-    const isAlreadySaved = savedJobs.some(job => job.id === jobToSave.id);
+  const handleSaveProject = (projectToSave: Project) => {
+    const savedProjects: Project[] = JSON.parse(localStorage.getItem('savedProjects') || '[]');
+    const isAlreadySaved = savedProjects.some(project => project.id === projectToSave.id);
     if (!isAlreadySaved) {
-        localStorage.setItem('savedJobs', JSON.stringify([...savedJobs, jobToSave]));
+        localStorage.setItem('savedProjects', JSON.stringify([...savedProjects, projectToSave]));
         toast({
-            title: "Job Saved!",
-            description: `${jobToSave.title} at ${jobToSave.company} has been saved.`
+            title: "Project Saved!",
+            description: `${projectToSave.title} at ${projectToSave.organization} has been saved.`
         });
     } else {
         toast({
             variant: "default",
             title: "Already Saved",
-            description: `This job is already in your saved list.`
+            description: `This project is already in your saved list.`
         });
     }
   };
 
-  const handleApply = (jobId: number) => {
-    const updatedAppliedJobs = [...appliedJobs, jobId];
-    setAppliedJobs(updatedAppliedJobs);
-    localStorage.setItem('appliedJobs', JSON.stringify(updatedAppliedJobs));
+  const handleApply = (projectId: number) => {
+    const updatedAppliedProjects = [...appliedProjects, projectId];
+    setAppliedProjects(updatedAppliedProjects);
+    localStorage.setItem('appliedProjects', JSON.stringify(updatedAppliedProjects));
 
     const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
     const applications = JSON.parse(localStorage.getItem('applications') || '[]');
     
     // Ensure we don't add duplicate applications
-    const hasAlreadyApplied = applications.some((app: any) => app.jobId === jobId && app.applicantProfile.data.email === userProfile.data.email);
+    const hasAlreadyApplied = applications.some((app: any) => app.projectId === projectId && app.applicantProfile.data.email === userProfile.data.email);
 
     if (!hasAlreadyApplied) {
-      applications.push({ jobId, applicantProfile: userProfile });
+      applications.push({ projectId, applicantProfile: userProfile });
       localStorage.setItem('applications', JSON.stringify(applications));
     }
     
-    const job = allJobs.find(j => j.id === jobId);
-    if (job) {
+    const project = allProjects.find(p => p.id === projectId);
+    if (project) {
         toast({
             title: "Application Sent!",
-            description: `You successfully applied for the ${job.title} position at ${job.company}.`
+            description: `You successfully applied for the ${project.title} position at ${project.organization}.`
         });
     }
   };
   
-  const pending = isPending || (submitted && !state.jobs?.length && !state.message.startsWith('No'));
-  const jobsToDisplay = allJobs.slice().reverse();
-  const suggestedJobs = jobsToDisplay.filter(job => state.jobs?.some(suggestion => job.title.toLowerCase().includes(suggestion.toLowerCase().split(' ').slice(0, 2).join(' ') || '')));
+  const pending = isPending || (submitted && !state.projects?.length && !state.message.startsWith('No'));
+  const projectsToDisplay = allProjects.slice().reverse();
+  const suggestedProjects = projectsToDisplay.filter(project => state.projects?.some(suggestion => project.title.toLowerCase().includes(suggestion.toLowerCase().split(' ').slice(0, 2).join(' ') || '')));
 
 
   return (
     <div className="space-y-4">
       <div className='flex justify-between items-center'>
-        <h2 className="text-2xl font-bold tracking-tight">Jobs based on your profile</h2>
-        <Link href="/job-seeker/search">
+        <h2 className="text-2xl font-bold tracking-tight">Projects based on your profile</h2>
+        <Link href="/student/search">
           <Button variant="link">View all</Button>
         </Link>
       </div>
@@ -258,21 +258,21 @@ function AiJobFeed() {
       {pending && (
         <div className="flex items-center justify-center p-8 gap-2">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <p className="text-muted-foreground">Finding jobs for you...</p>
+          <p className="text-muted-foreground">Finding projects for you...</p>
         </div>
       )}
 
-      {!pending && suggestedJobs.length > 0 && (
+      {!pending && suggestedProjects.length > 0 && (
         <div className="space-y-4">
-          {suggestedJobs.map(job => (
-            <JobCard key={job.id} job={job} onSave={handleSaveJob} onApply={handleApply} isApplied={appliedJobs.includes(job.id)} />
+          {suggestedProjects.map(project => (
+            <ProjectCard key={project.id} project={project} onSave={handleSaveProject} onApply={handleApply} isApplied={appliedProjects.includes(project.id)} />
           ))}
         </div>
       )}
 
-      {!pending && suggestedJobs.length === 0 && (
+      {!pending && suggestedProjects.length === 0 && (
          <div className="text-center py-10">
-            <p className="text-lg text-muted-foreground">No recommended jobs found at the moment.</p>
+            <p className="text-lg text-muted-foreground">No recommended projects found at the moment.</p>
             <p className="text-sm text-muted-foreground">Try enhancing your profile for better matches.</p>
           </div>
       )}
@@ -280,13 +280,11 @@ function AiJobFeed() {
   );
 }
 
-export default function JobSeekerPage() {
+export default function StudentPage() {
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <ProfileCompletionCard />
-      <AiJobFeed />
+      <AiProjectFeed />
     </div>
   );
 }
-
-    

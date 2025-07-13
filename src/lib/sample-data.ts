@@ -1,8 +1,8 @@
 
-export interface Job {
+export interface Project {
     id: number;
     title: string;
-    company: string;
+    organization: string;
     location: string;
     type: 'Full-time' | 'Part-time' | 'Contract';
     description: string;
@@ -10,11 +10,11 @@ export interface Job {
     salary: string;
 }
   
-export const sampleJobs: Job[] = [
+export const sampleProjects: Project[] = [
     {
         id: 1,
         title: 'Senior Frontend Developer',
-        company: 'TechCorp',
+        organization: 'TechCorp',
         location: 'San Francisco, CA',
         type: 'Full-time',
         description: 'Join our team to build next-generation web applications. We are looking for a developer with a passion for creating beautiful and functional user interfaces.',
@@ -24,7 +24,7 @@ export const sampleJobs: Job[] = [
     {
         id: 2,
         title: 'Backend Engineer',
-        company: 'Innovate LLC',
+        organization: 'Innovate LLC',
         location: 'New York, NY',
         type: 'Full-time',
         description: 'We are seeking a skilled backend engineer to design, develop, and maintain our server-side applications and APIs. Experience with cloud services is a plus.',
@@ -34,7 +34,7 @@ export const sampleJobs: Job[] = [
     {
         id: 3,
         title: 'UI/UX Designer',
-        company: 'Creative Solutions',
+        organization: 'Creative Solutions',
         location: 'Austin, TX',
         type: 'Contract',
         description: 'We need a talented UI/UX designer for a 6-month contract to help redesign our mobile application. You will work closely with our product and engineering teams.',
@@ -44,7 +44,7 @@ export const sampleJobs: Job[] = [
     {
         id: 4,
         title: 'Junior React Developer',
-        company: 'WebWorks',
+        organization: 'WebWorks',
         location: 'Remote',
         type: 'Part-time',
         description: 'An exciting opportunity for a junior developer to grow their skills. You will assist our senior developers in building new features and fixing bugs.',
@@ -54,7 +54,7 @@ export const sampleJobs: Job[] = [
      {
         id: 5,
         title: 'Full-Stack Engineer',
-        company: 'DataDriven Inc.',
+        organization: 'DataDriven Inc.',
         location: 'Chicago, IL',
         type: 'Full-time',
         description: 'We are hiring a versatile full-stack engineer to work on both our client-facing applications and our internal data processing pipelines.',

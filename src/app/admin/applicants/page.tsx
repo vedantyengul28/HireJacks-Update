@@ -14,53 +14,53 @@ import {
 } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Job } from '@/lib/sample-data';
+import { Project } from '@/lib/sample-data';
 import BackButton from '@/components/ui/back-button';
 
 interface Application {
-  jobId: number;
+  projectId: number;
   applicantProfile: any;
 }
 
 interface GroupedApplications {
   [key: number]: {
-    job: Job;
+    project: Project;
     applicants: any[];
   };
 }
 
-export default function RecruiterApplicantsPage() {
+export default function AdminApplicantsPage() {
   const [groupedApps, setGroupedApps] = useState<GroupedApplications>({});
-  const [openJobs, setOpenJobs] = useState<number[]>([]);
+  const [openProjects, setOpenProjects] = useState<number[]>([]);
   const [selectedApplicant, setSelectedApplicant] = useState<any | null>(null);
 
   useEffect(() => {
     try {
-      const allJobs: Job[] = JSON.parse(localStorage.getItem('allJobs') || '[]');
+      const allProjects: Project[] = JSON.parse(localStorage.getItem('allProjects') || '[]');
       const applications: Application[] = JSON.parse(localStorage.getItem('applications') || '[]');
 
       const grouped: GroupedApplications = {};
 
       applications.forEach(app => {
-        const job = allJobs.find(j => j.id === app.jobId);
-        if (job) {
-          if (!grouped[app.jobId]) {
-            grouped[app.jobId] = { job, applicants: [] };
+        const project = allProjects.find(p => p.id === app.projectId);
+        if (project) {
+          if (!grouped[app.projectId]) {
+            grouped[app.projectId] = { project, applicants: [] };
           }
-          grouped[app.jobId].applicants.push(app.applicantProfile);
+          grouped[app.projectId].applicants.push(app.applicantProfile);
         }
       });
 
       setGroupedApps(grouped);
-      setOpenJobs(Object.keys(grouped).map(Number));
+      setOpenProjects(Object.keys(grouped).map(Number));
     } catch (error) {
       console.error("Error processing application data:", error);
     }
   }, []);
 
-  const toggleJob = (jobId: number) => {
-    setOpenJobs(prev =>
-      prev.includes(jobId) ? prev.filter(id => id !== jobId) : [...prev, jobId]
+  const toggleProject = (projectId: number) => {
+    setOpenProjects(prev =>
+      prev.includes(projectId) ? prev.filter(id => id !== projectId) : [...prev, projectId]
     );
   };
   
@@ -78,7 +78,7 @@ export default function RecruiterApplicantsPage() {
                     Manage Applicants
                  </CardTitle>
                  <CardDescription>
-                    {totalApplicants > 0 ? `You have ${totalApplicants} applicant(s) across ${Object.keys(groupedApps).length} job(s).` : 'No applicants yet.'}
+                    {totalApplicants > 0 ? `You have ${totalApplicants} applicant(s) across ${Object.keys(groupedApps).length} project(s).` : 'No applicants yet.'}
                  </CardDescription>
               </div>
           </div>
@@ -86,28 +86,28 @@ export default function RecruiterApplicantsPage() {
         <CardContent>
           {Object.keys(groupedApps).length > 0 ? (
             <div className="space-y-4">
-              {Object.values(groupedApps).map(({ job, applicants }) => (
-                <Card key={job.id} className="overflow-hidden">
+              {Object.values(groupedApps).map(({ project, applicants }) => (
+                <Card key={project.id} className="overflow-hidden">
                   <div
                     className="flex justify-between items-center p-4 cursor-pointer hover:bg-muted/50"
-                    onClick={() => toggleJob(job.id)}
+                    onClick={() => toggleProject(project.id)}
                   >
                     <div className="flex items-center gap-3">
                       <Briefcase className="h-6 w-6 text-accent" />
                       <div>
-                        <h3 className="font-semibold">{job.title}</h3>
+                        <h3 className="font-semibold">{project.title}</h3>
                         <p className="text-sm text-muted-foreground">
                           {applicants.length} applicant{applicants.length !== 1 && 's'}
                         </p>
                       </div>
                     </div>
-                    {openJobs.includes(job.id) ? (
+                    {openProjects.includes(project.id) ? (
                       <ChevronUp className="h-5 w-5" />
                     ) : (
                       <ChevronDown className="h-5 w-5" />
                     )}
                   </div>
-                  {openJobs.includes(job.id) && (
+                  {openProjects.includes(project.id) && (
                     <div className="p-4 border-t">
                         {applicants.length > 0 ? (
                              <ul className="space-y-3">
@@ -130,7 +130,7 @@ export default function RecruiterApplicantsPage() {
                                 ))}
                             </ul>
                         ): (
-                             <p className="text-sm text-muted-foreground text-center py-4">No applicants for this job yet.</p>
+                             <p className="text-sm text-muted-foreground text-center py-4">No applicants for this project yet.</p>
                         )}
                     </div>
                   )}
@@ -141,7 +141,7 @@ export default function RecruiterApplicantsPage() {
             <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg">
                 <Users className="w-12 h-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No Applicants Yet</h3>
-                <p className="text-muted-foreground">Applicants for your jobs will appear here.</p>
+                <p className="text-muted-foreground">Applicants for your projects will appear here.</p>
             </div>
           )}
         </CardContent>

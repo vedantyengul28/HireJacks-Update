@@ -3,17 +3,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BarChart3 } from 'lucide-react';
 import BackButton from '@/components/ui/back-button';
 
-export default function RecruiterAnalyticsPage() {
+export default function AdminAnalyticsPage() {
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
        <BackButton />
        <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl font-bold tracking-tight">
-            Job Analytics
+            Project Analytics
           </CardTitle>
           <CardDescription>
-            Gain insights into your job postings and applicant engagement.
+            Gain insights into your project postings and applicant engagement.
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
