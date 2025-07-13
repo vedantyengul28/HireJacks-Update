@@ -1,18 +1,20 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
+import { useState, useEffect, useActionState, useTransition } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Briefcase, MapPin, Search as SearchIcon, Code, Bookmark, Check } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Briefcase, MapPin, Bookmark, Check, Bot, Loader2, AlertCircle } from 'lucide-react';
 import { sampleJobs, type Job } from '@/lib/sample-data';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import BackButton from '@/components/ui/back-button';
+import { handleSuggestJobs } from '@/app/actions';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
-function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; }) {
 
+function JobCard({ job, onSave, onApply, isApplied, isSaved }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; isSaved: boolean; }) {
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
@@ -37,7 +39,7 @@ function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: 
              <p className="text-sm font-semibold">{job.salary}</p>
              <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => onSave(job)}>
-                    <Bookmark className="h-4 w-4" />
+                    <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
                     <span className="sr-only">Save Job</span>
                 </Button>
                 {isApplied ? (
@@ -55,94 +57,78 @@ function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: 
   );
 }
 
-
-export default function JobSearchPage() {
+export default function AiJobSearchPage() {
   const { toast } = useToast();
-  const [filters, setFilters] = useState({
-    keyword: '',
-    location: '',
-    skills: '',
-  });
+  const [isPending, startTransition] = useTransition();
+  const [state, formAction] = useActionState(handleSuggestJobs, { message: '', jobs: [] });
+  
   const [allJobs, setAllJobs] = useState<Job[]>([]);
-  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
+  const [savedJobs, setSavedJobs] = useState<number[]>([]);
+  const [profileSummary, setProfileSummary] = useState('');
 
   useEffect(() => {
+    let isMounted = true;
     try {
         const storedJobs = localStorage.getItem('allJobs');
         const jobs = storedJobs ? JSON.parse(storedJobs) : sampleJobs;
-        setAllJobs(jobs);
-        setFilteredJobs(jobs.slice().reverse()); // Show newest first
-        
-        if (!storedJobs) {
-            localStorage.setItem('allJobs', JSON.stringify(sampleJobs));
-        }
 
         const storedAppliedJobs = localStorage.getItem('appliedJobs');
-        if (storedAppliedJobs) {
-          setAppliedJobs(JSON.parse(storedAppliedJobs));
+        const applied = storedAppliedJobs ? JSON.parse(storedAppliedJobs) : [];
+        
+        const storedSavedJobs = localStorage.getItem('savedJobs');
+        const saved = storedSavedJobs ? JSON.parse(storedSavedJobs).map((j: Job) => j.id) : [];
+
+        const userProfileData = localStorage.getItem('userProfile');
+        const profile = userProfileData ? JSON.parse(userProfileData) : {};
+        const summary = profile.data?.summary || "";
+        
+        if(isMounted) {
+            setAllJobs(jobs);
+            setAppliedJobs(applied);
+            setSavedJobs(saved);
+            setProfileSummary(summary);
         }
     } catch(error) {
         console.error("Error accessing localStorage:", error);
-        setAllJobs(sampleJobs);
-        setFilteredJobs(sampleJobs.slice().reverse());
+        if(isMounted) {
+            setAllJobs(sampleJobs);
+            setProfileSummary("I am a frontend developer with experience in React and TypeScript.");
+        }
     }
+    return () => { isMounted = false; };
   }, []);
-  
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFilters(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const lowercasedKeyword = filters.keyword.toLowerCase();
-    const lowercasedLocation = filters.location.toLowerCase();
-    const lowercasedSkills = filters.skills.toLowerCase().split(',').map(s => s.trim()).filter(s => s);
-
-    const results = allJobs.filter((job: Job) => {
-      const titleMatch = job.title.toLowerCase().includes(lowercasedKeyword);
-      const organizationMatch = job.organization.toLowerCase().includes(lowercasedKeyword);
-      const descriptionMatch = job.description.toLowerCase().includes(lowercasedKeyword);
-      const keywordMatch = titleMatch || organizationMatch || descriptionMatch;
-
-      const locationMatch = job.location.toLowerCase().includes(lowercasedLocation);
-
-      const skillsMatch = lowercasedSkills.length === 0 || lowercasedSkills.every(skill => 
-        job.skills.some(jobSkill => jobSkill.toLowerCase().includes(skill))
-      );
-
-      return keywordMatch && locationMatch && skillsMatch;
-    });
-
-    setFilteredJobs(results.slice().reverse());
-  };
-  
   const handleSaveJob = (jobToSave: Job) => {
-    let savedJobs: Job[] = [];
+    let currentSavedJobs: Job[] = [];
     try {
-      savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+        currentSavedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
     } catch (e) {
-      console.error(e)
+        console.error(e)
     }
 
-    const isAlreadySaved = savedJobs.some(job => job.id === jobToSave.id);
-    if (!isAlreadySaved) {
-        localStorage.setItem('savedJobs', JSON.stringify([...savedJobs, jobToSave]));
+    const isAlreadySaved = currentSavedJobs.some(job => job.id === jobToSave.id);
+    let updatedSavedJobs;
+
+    if (isAlreadySaved) {
+        updatedSavedJobs = currentSavedJobs.filter(job => job.id !== jobToSave.id);
+        toast({
+            variant: "destructive",
+            title: "Job Unsaved",
+            description: `${jobToSave.title} at ${jobToSave.organization} has been removed from your list.`
+        });
+    } else {
+        updatedSavedJobs = [...currentSavedJobs, jobToSave];
         toast({
             title: "Job Saved!",
             description: `${jobToSave.title} at ${jobToSave.organization} has been saved.`
         });
-    } else {
-        toast({
-            variant: "default",
-            title: "Already Saved",
-            description: `This job is already in your saved list.`
-        });
     }
+    
+    localStorage.setItem('savedJobs', JSON.stringify(updatedSavedJobs));
+    setSavedJobs(updatedSavedJobs.map(p => p.id));
   };
-
+  
   const handleApply = (jobId: number) => {
     const updatedAppliedJobs = [...appliedJobs, jobId];
     setAppliedJobs(updatedAppliedJobs);
@@ -166,60 +152,92 @@ export default function JobSearchPage() {
         });
     }
   };
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('profile', profileSummary);
+    startTransition(() => {
+        formAction(formData);
+    });
+  }
 
+  const suggestedJobs = state.jobs && state.jobs.length > 0
+    ? allJobs.filter(job => state.jobs?.some(suggestion => 
+        job.title.toLowerCase().includes(suggestion.toLowerCase().split(' ').slice(0, 2).join(' '))))
+    : [];
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
       <BackButton />
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Find Your Dream Job</CardTitle>
-          <CardDescription>Search for jobs based on your skills and preferences.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSearch} className="grid sm:grid-cols-3 gap-4 items-end">
-            <div className="space-y-2">
-              <label htmlFor="keyword" className="text-sm font-medium">Keyword / Title</label>
-              <div className="relative">
-                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="keyword" name="keyword" placeholder="e.g., Software Engineer" className="pl-10" value={filters.keyword} onChange={handleInputChange} />
-              </div>
-            </div>
-             <div className="space-y-2">
-              <label htmlFor="location" className="text-sm font-medium">Location</label>
-               <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="location" name="location" placeholder="e.g., San Francisco" className="pl-10" value={filters.location} onChange={handleInputChange}/>
-               </div>
-            </div>
-             <div className="space-y-2">
-              <label htmlFor="skills" className="text-sm font-medium">Skills</label>
-               <div className="relative">
-                <Code className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="skills" name="skills" placeholder="e.g., React, Node.js" className="pl-10" value={filters.skills} onChange={handleInputChange}/>
-               </div>
-            </div>
-            <Button type="submit" className="sm:col-span-3">
-              <SearchIcon className="mr-2 h-4 w-4" />
-              Search Jobs
-            </Button>
+      <div className="max-w-2xl mx-auto space-y-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+                <Bot className="h-6 w-6 text-primary" />
+                AI Job Search
+            </CardTitle>
+            <CardDescription>Describe your skills and experience, and our AI will find the best jobs for you. We've pre-filled this from your profile summary.</CardDescription>
+          </CardHeader>
+          <form onSubmit={handleSubmit}>
+            <CardContent>
+              <Textarea
+                placeholder="e.g., I'm a full-stack developer with 3 years of experience in React, Node.js, and cloud services..."
+                rows={5}
+                value={profileSummary}
+                onChange={(e) => setProfileSummary(e.target.value)}
+                className="resize-none"
+              />
+              {state.issues && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>
+                    {state.issues.join(' ')}
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full" disabled={isPending || !profileSummary}>
+                {isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <Bot className="mr-2 h-4 w-4" />
+                )}
+                Get AI Recommendations
+              </Button>
+            </CardFooter>
           </form>
-        </CardContent>
-      </Card>
-      
-      <div className="space-y-6">
-         <h2 className="text-2xl font-bold tracking-tight">
-            {filteredJobs.length} Job Openings
-        </h2>
-        {filteredJobs.length > 0 ? (
-          filteredJobs.map(job => (
-            <JobCard key={job.id} job={job} onSave={handleSaveJob} onApply={handleApply} isApplied={appliedJobs.includes(job.id)} />
-          ))
-        ) : (
-          <div className="text-center py-16">
-            <p className="text-lg text-muted-foreground">No jobs found matching your criteria.</p>
-          </div>
-        )}
+        </Card>
+        
+        <div className="space-y-6">
+          {state.jobs && state.jobs.length > 0 && (
+            <h2 className="text-2xl font-bold tracking-tight">
+              {suggestedJobs.length} Suggested Job{suggestedJobs.length !== 1 && 's'}
+            </h2>
+          )}
+          
+          {isPending && (
+            <div className="flex items-center justify-center p-8 gap-2">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <p className="text-muted-foreground">Finding jobs for you...</p>
+            </div>
+          )}
+
+          {!isPending && suggestedJobs.length > 0 && (
+            suggestedJobs.map(job => (
+              <JobCard key={job.id} job={job} onSave={handleSaveJob} onApply={handleApply} isApplied={appliedJobs.includes(job.id)} isSaved={savedJobs.includes(job.id)} />
+            ))
+          )}
+
+          {!isPending && state.jobs && suggestedJobs.length === 0 && (
+            <div className="text-center py-16">
+              <p className="text-lg text-muted-foreground">No jobs found matching your profile.</p>
+              <p className="text-sm text-muted-foreground">Try refining your summary for better results.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

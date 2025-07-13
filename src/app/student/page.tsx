@@ -1,14 +1,13 @@
 
 'use client';
 
-import { handleSuggestJobs } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { sampleJobs, type Job } from '@/lib/sample-data';
-import { ArrowUp, Briefcase, Loader2, MapPin, Bookmark, Check } from 'lucide-react';
-import { useEffect, useState, useActionState, useTransition } from 'react';
+import { ArrowUp, Briefcase, MapPin, Bookmark, Check } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -163,15 +162,11 @@ function JobCard({ job, onSave, onApply, isApplied, isSaved }: { job: Job; onSav
   );
 }
 
-function AiJobFeed() {
-  const [isPending, startTransition] = useTransition();
-  const [state, formAction] = useActionState(handleSuggestJobs, { message: '', jobs: [] });
-  const [submitted, setSubmitted] = useState(false);
+function RecentJobsFeed() {
   const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
   const [savedJobs, setSavedJobs] = useState<number[]>([]);
   const [allJobs, setAllJobs] = useState<Job[]>([]);
   const { toast } = useToast();
-  const [profileSummary, setProfileSummary] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -185,17 +180,12 @@ function AiJobFeed() {
             
             const storedSavedJobs = localStorage.getItem('savedJobs');
             const saved = storedSavedJobs ? JSON.parse(storedSavedJobs).map((j: Job) => j.id) : [];
-
-            const userProfileData = localStorage.getItem('userProfile');
-            const profile = userProfileData ? JSON.parse(userProfileData) : {};
-            const summary = profile.data?.summary || "No profile summary found. Please update your profile.";
             
             if (isMounted) {
                 setAllJobs(jobs);
                 if (!storedJobs) localStorage.setItem('allJobs', JSON.stringify(sampleJobs));
                 setAppliedJobs(applied);
                 setSavedJobs(saved);
-                setProfileSummary(summary);
             }
         } catch (error) {
             console.error("Error accessing localStorage:", error);
@@ -207,16 +197,6 @@ function AiJobFeed() {
     return () => { isMounted = false; };
   }, []);
 
-  useEffect(() => {
-    if (!submitted && profileSummary) {
-        const formData = new FormData();
-        formData.append('profile', profileSummary);
-        startTransition(() => {
-            formAction(formData);
-        });
-        setSubmitted(true);
-    }
-  }, [submitted, formAction, profileSummary]);
 
   const handleSaveJob = (jobToSave: Job) => {
     let currentSavedJobs: Job[] = [];
@@ -290,42 +270,27 @@ function AiJobFeed() {
     }
   };
   
-  const pending = isPending || (submitted && !state.jobs?.length && !state.message.startsWith('No'));
-  const jobsToDisplay = allJobs.slice().reverse();
-  const suggestedJobs = state.jobs && state.jobs.length > 0
-    ? jobsToDisplay.filter(job => state.jobs?.some(suggestion => 
-        job.title.toLowerCase().includes(suggestion.toLowerCase().split(' ').slice(0, 2).join(' ') || '')))
-    : [];
-
+  const jobsToDisplay = allJobs.slice().reverse().slice(0, 5);
 
   return (
     <div className="space-y-4">
       <div className='flex justify-between items-center'>
-        <h2 className="text-2xl font-bold tracking-tight">Jobs based on your profile</h2>
-        <Link href="/student/search">
+        <h2 className="text-2xl font-bold tracking-tight">Recent Jobs</h2>
+        <Link href="/student/apply">
           <Button variant="link">View all</Button>
         </Link>
       </div>
 
-      {pending && (
-        <div className="flex items-center justify-center p-8 gap-2">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <p className="text-muted-foreground">Finding jobs for you...</p>
-        </div>
-      )}
-
-      {!pending && suggestedJobs.length > 0 && (
+      {jobsToDisplay.length > 0 ? (
         <div className="space-y-4">
-          {suggestedJobs.map(job => (
+          {jobsToDisplay.map(job => (
             <JobCard key={job.id} job={job} onSave={handleSaveJob} onApply={handleApply} isApplied={appliedJobs.includes(job.id)} isSaved={savedJobs.includes(job.id)} />
           ))}
         </div>
-      )}
-
-      {!pending && suggestedJobs.length === 0 && (
+      ) : (
          <div className="text-center py-10">
-            <p className="text-lg text-muted-foreground">No recommended jobs found at the moment.</p>
-            <p className="text-sm text-muted-foreground">Try enhancing your profile for better matches.</p>
+            <p className="text-lg text-muted-foreground">No recent jobs found.</p>
+            <p className="text-sm text-muted-foreground">Check back later for new opportunities.</p>
           </div>
       )}
     </div>
@@ -336,7 +301,7 @@ export default function StudentPage() {
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <ProfileCompletionCard />
-      <AiJobFeed />
+      <RecentJobsFeed />
     </div>
   );
 }
