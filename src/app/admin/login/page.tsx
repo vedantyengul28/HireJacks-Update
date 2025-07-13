@@ -127,7 +127,7 @@ export default function AdminAuthPage() {
             <CardHeader>
               <CardTitle>Admin Login</CardTitle>
               <CardDescription>
-                Sign in to manage your project postings.
+                Sign in to manage your job postings.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

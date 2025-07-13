@@ -145,7 +145,7 @@ export default function StudentAuthPage() {
               <CardHeader>
                 <CardTitle>Welcome Back</CardTitle>
                 <CardDescription>
-                  Sign in to continue your project search.
+                  Sign in to continue your job search.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -166,7 +166,7 @@ export default function StudentAuthPage() {
               <CardHeader>
                 <CardTitle>Create an Account</CardTitle>
                 <CardDescription>
-                  Join HireJacks to find your dream project.
+                  Join HireJacks to find your dream job.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

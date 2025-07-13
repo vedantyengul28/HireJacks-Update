@@ -10,10 +10,10 @@ export default function AdminAnalyticsPage() {
        <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl font-bold tracking-tight">
-            Project Analytics
+            Job Analytics
           </CardTitle>
           <CardDescription>
-            Gain insights into your project postings and applicant engagement.
+            Gain insights into your job postings and applicant engagement.
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">

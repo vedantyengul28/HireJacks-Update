@@ -27,7 +27,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 
 const sidebarLinks = [
-  { icon: Search, label: 'Search projects', href: '/student/search' },
+  { icon: Search, label: 'Search jobs', href: '/student/search' },
   { icon: MessageSquare, label: 'Chat for help', href: '#' },
   { icon: Eye, label: 'Display preferences', href: '#' },
   { icon: BookOpen, label: 'HireJacks blog', href: '#' },
@@ -48,7 +48,7 @@ function Sidebar() {
           <div>
             <h2 className="text-lg font-semibold">Build your profile</h2>
             <p className="text-sm text-muted-foreground">
-              Project opportunities are waiting for you.
+              Job opportunities are waiting for you.
             </p>
           </div>
         </div>
@@ -121,7 +121,7 @@ export default function RoleSelectionPage() {
                 </div>
                 <CardTitle className="text-2xl font-semibold">Student</CardTitle>
                 <CardDescription className="mt-2 text-base">
-                  Find projects, get AI-powered suggestions, and build your career.
+                  Find jobs, get AI-powered suggestions, and build your career.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -134,7 +134,7 @@ export default function RoleSelectionPage() {
                 </div>
                 <CardTitle className="text-2xl font-semibold">Admin</CardTitle>
                 <CardDescription className="mt-2 text-base">
-                  Post projects, manage applicants, and find the perfect candidate.
+                  Post jobs, manage applicants, and find the perfect candidate.
                 </CardDescription>
               </CardHeader>
             </Card>

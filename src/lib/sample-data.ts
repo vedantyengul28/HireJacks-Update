@@ -1,5 +1,5 @@
 
-export interface Project {
+export interface Job {
     id: number;
     title: string;
     organization: string;
@@ -10,7 +10,7 @@ export interface Project {
     salary: string;
 }
   
-export const sampleProjects: Project[] = [
+export const sampleJobs: Job[] = [
     {
         id: 1,
         title: 'Senior Frontend Developer',

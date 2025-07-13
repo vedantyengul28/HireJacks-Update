@@ -18,7 +18,7 @@ import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, S
 
 const sidebarLinks = [
   { href: '/roles', label: 'Get Started' },
-  { href: '/student/search', label: 'Search Projects' },
+  { href: '/student/search', label: 'Search Jobs' },
   { href: '#', label: 'How HireJacks Works' },
   { href: '#', label: 'About Us' },
 ];

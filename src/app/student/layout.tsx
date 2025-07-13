@@ -25,9 +25,9 @@ const mobileNavItems = [
 
 const sidebarNavItems = [
     { href: '/student', icon: Home, label: 'Home' },
-    { href: '/student/search', icon: Bot, label: 'AI Project Recommendation' },
+    { href: '/student/search', icon: Bot, label: 'AI Job Recommendation' },
     { href: '/student/profile', icon: User, label: 'Resume Builder AI' },
-    { href: '/student/saved', icon: Bookmark, label: 'Saved Projects' },
+    { href: '/student/saved', icon: Bookmark, label: 'Saved Jobs' },
     { href: '/student/settings', icon: Settings, label: 'Settings' },
     { href: '/student/feedback', icon: MessageSquare, label: 'Feedback' },
 ];

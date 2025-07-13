@@ -15,7 +15,7 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   const navItems = [
-    { href: '/admin', icon: PlusSquare, label: 'Post Project' },
+    { href: '/admin', icon: PlusSquare, label: 'Post Job' },
     { href: '/admin/applicants', icon: Users, label: 'Applicants' },
     { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   ];

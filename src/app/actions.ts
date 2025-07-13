@@ -1,7 +1,7 @@
 
 'use server';
 
-import { suggestRelevantProjects, type SuggestRelevantProjectsOutput } from '@/ai/flows/suggest-relevant-projects';
+import { suggestRelevantJobs, type SuggestRelevantJobsOutput } from '@/ai/flows/suggest-relevant-jobs';
 import { z } from 'zod';
 
 const FormSchema = z.object({
@@ -10,12 +10,12 @@ const FormSchema = z.object({
 
 export type FormState = {
   message: string;
-  projects?: string[];
+  jobs?: string[];
   fields?: Record<string, string>;
   issues?: string[];
 };
 
-export async function handleSuggestProjects(
+export async function handleSuggestJobs(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
@@ -34,18 +34,18 @@ export async function handleSuggestProjects(
   const { profile } = validatedFields.data;
 
   try {
-    const result: SuggestRelevantProjectsOutput = await suggestRelevantProjects({
+    const result: SuggestRelevantJobsOutput = await suggestRelevantJobs({
       profile
     });
     
-    if (result.projectSuggestions && result.projectSuggestions.length > 0) {
-        return { message: 'Success! Here are your tailored project suggestions.', projects: result.projectSuggestions };
+    if (result.jobSuggestions && result.jobSuggestions.length > 0) {
+        return { message: 'Success! Here are your tailored job suggestions.', jobs: result.jobSuggestions };
     } else {
-        return { message: 'No project suggestions found. Try refining your profile.' };
+        return { message: 'No job suggestions found. Try refining your profile.' };
     }
 
   } catch (error) {
     console.error('AI Error:', error);
-    return { message: 'We hit a snag. Could not get project suggestions from our AI assistant at the moment.' };
+    return { message: 'We hit a snag. Could not get job suggestions from our AI assistant at the moment.' };
   }
 }

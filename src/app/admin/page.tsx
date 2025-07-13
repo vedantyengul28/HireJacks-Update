@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, Briefcase, Trash2, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { sampleProjects, type Project } from '@/lib/sample-data';
+import { sampleJobs, type Job } from '@/lib/sample-data';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import BackButton from '@/components/ui/back-button';
@@ -18,10 +18,10 @@ import BackButton from '@/components/ui/back-button';
 export default function AdminPage() {
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
-  const [postedProjects, setPostedProjects] = useState<Project[]>([]);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [postedJobs, setPostedJobs] = useState<Job[]>([]);
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
 
-  const [projectDetails, setProjectDetails] = useState({
+  const [jobDetails, setJobDetails] = useState({
     title: '',
     organization: '',
     location: '',
@@ -33,32 +33,32 @@ export default function AdminPage() {
 
   useEffect(() => {
     try {
-        const allProjectsString = localStorage.getItem('allProjects');
-        if (allProjectsString) {
-            const allProjects: Project[] = JSON.parse(allProjectsString);
-            setPostedProjects(allProjects);
+        const allJobsString = localStorage.getItem('allJobs');
+        if (allJobsString) {
+            const allJobs: Job[] = JSON.parse(allJobsString);
+            setPostedJobs(allJobs);
         } else {
-            const initialProjects = sampleProjects;
-            setPostedProjects(initialProjects);
-            localStorage.setItem('allProjects', JSON.stringify(initialProjects));
+            const initialJobs = sampleJobs;
+            setPostedJobs(initialJobs);
+            localStorage.setItem('allJobs', JSON.stringify(initialJobs));
         }
     } catch(e) {
         console.error(e);
-        setPostedProjects(sampleProjects);
+        setPostedJobs(sampleJobs);
     }
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
-    setProjectDetails(prev => ({ ...prev, [id]: value }));
+    setJobDetails(prev => ({ ...prev, [id]: value }));
   };
 
   const handleSelectChange = (value: 'Full-time' | 'Part-time' | 'Contract') => {
-    setProjectDetails(prev => ({ ...prev, type: value }));
+    setJobDetails(prev => ({ ...prev, type: value }));
   };
 
   const resetForm = () => {
-    setProjectDetails({
+    setJobDetails({
         title: '',
         organization: '',
         location: '',
@@ -67,66 +67,66 @@ export default function AdminPage() {
         description: '',
         skills: '',
     });
-    setEditingProject(null);
+    setEditingJob(null);
     setShowForm(false);
   }
 
-  const handlePostProject = (e: React.FormEvent) => {
+  const handlePostJob = (e: React.FormEvent) => {
     e.preventDefault();
-    let allProjects: Project[] = [];
+    let allJobs: Job[] = [];
     try {
-       const storedProjects = localStorage.getItem('allProjects');
-       allProjects = storedProjects ? JSON.parse(storedProjects) : [];
+       const storedJobs = localStorage.getItem('allJobs');
+       allJobs = storedJobs ? JSON.parse(storedJobs) : [];
     } catch (e) {
         console.error(e)
     }
 
-    if (editingProject) {
-        // Update existing project
-        const updatedProject = {
-            ...editingProject,
-            ...projectDetails,
-            skills: projectDetails.skills.split(',').map(s => s.trim()),
+    if (editingJob) {
+        // Update existing job
+        const updatedJob = {
+            ...editingJob,
+            ...jobDetails,
+            skills: jobDetails.skills.split(',').map(s => s.trim()),
         };
-        allProjects = allProjects.map(project => project.id === editingProject.id ? updatedProject : project);
-        toast({ title: 'Project Updated!', description: 'Your project posting has been successfully updated.' });
+        allJobs = allJobs.map(job => job.id === editingJob.id ? updatedJob : job);
+        toast({ title: 'Job Updated!', description: 'Your job posting has been successfully updated.' });
     } else {
-        // Create new project
-        const newProject: Project = {
-            id: allProjects.length > 0 ? Math.max(...allProjects.map(p => p.id)) + 1 : 1,
-            ...projectDetails,
-            skills: projectDetails.skills.split(',').map(s => s.trim()),
+        // Create new job
+        const newJob: Job = {
+            id: allJobs.length > 0 ? Math.max(...allJobs.map(p => p.id)) + 1 : 1,
+            ...jobDetails,
+            skills: jobDetails.skills.split(',').map(s => s.trim()),
         };
-        allProjects.push(newProject);
-        toast({ title: 'Project Posted!', description: `${newProject.title} at ${newProject.organization} is now live.` });
+        allJobs.push(newJob);
+        toast({ title: 'Job Posted!', description: `${newJob.title} at ${newJob.organization} is now live.` });
     }
 
-    localStorage.setItem('allProjects', JSON.stringify(allProjects));
-    setPostedProjects(allProjects);
+    localStorage.setItem('allJobs', JSON.stringify(allJobs));
+    setPostedJobs(allJobs);
     resetForm();
   };
 
-  const handleEditProject = (project: Project) => {
-    setEditingProject(project);
-    setProjectDetails({
-        ...project,
-        skills: project.skills.join(', '),
+  const handleEditJob = (job: Job) => {
+    setEditingJob(job);
+    setJobDetails({
+        ...job,
+        skills: job.skills.join(', '),
     });
     setShowForm(true);
   };
   
-  const handleDeleteProject = (projectId: number) => {
-     let allProjects: Project[] = [];
+  const handleDeleteJob = (jobId: number) => {
+     let allJobs: Job[] = [];
       try {
-        const storedProjects = localStorage.getItem('allProjects');
-        allProjects = storedProjects ? JSON.parse(storedProjects) : [];
+        const storedJobs = localStorage.getItem('allJobs');
+        allJobs = storedJobs ? JSON.parse(storedJobs) : [];
       } catch(e) {
         console.error(e)
       }
-     allProjects = allProjects.filter(project => project.id !== projectId);
-     localStorage.setItem('allProjects', JSON.stringify(allProjects));
-     setPostedProjects(allProjects);
-     toast({ variant: 'destructive', title: 'Project Deleted', description: 'The project posting has been removed.' });
+     allJobs = allJobs.filter(job => job.id !== jobId);
+     localStorage.setItem('allJobs', JSON.stringify(allJobs));
+     setPostedJobs(allJobs);
+     toast({ variant: 'destructive', title: 'Job Deleted', description: 'The job posting has been removed.' });
   }
 
   return (
@@ -138,33 +138,33 @@ export default function AdminPage() {
             Admin Dashboard
           </CardTitle>
           <CardDescription>
-            Manage your project postings and connect with top talent.
+            Manage your job postings and connect with top talent.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {showForm ? (
-            <form onSubmit={handlePostProject} className="space-y-4">
-               <h3 className="text-lg font-semibold">{editingProject ? 'Edit Project Posting' : 'Create New Project Posting'}</h3>
+            <form onSubmit={handlePostJob} className="space-y-4">
+               <h3 className="text-lg font-semibold">{editingJob ? 'Edit Job Posting' : 'Create New Job Posting'}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Project Title</Label>
-                  <Input id="title" value={projectDetails.title} onChange={handleInputChange} placeholder="e.g., Senior Developer" required />
+                  <Label htmlFor="title">Job Title</Label>
+                  <Input id="title" value={jobDetails.title} onChange={handleInputChange} placeholder="e.g., Senior Developer" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="organization">Organization Name</Label>
-                  <Input id="organization" value={projectDetails.organization} onChange={handleInputChange} placeholder="e.g., TechCorp" required />
+                  <Input id="organization" value={jobDetails.organization} onChange={handleInputChange} placeholder="e.g., TechCorp" required />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                  <div className="space-y-2">
                     <Label htmlFor="location">Location</Label>
-                    <Input id="location" value={projectDetails.location} onChange={handleInputChange} placeholder="e.g., San Francisco, CA" required />
+                    <Input id="location" value={jobDetails.location} onChange={handleInputChange} placeholder="e.g., San Francisco, CA" required />
                  </div>
                  <div className="space-y-2">
-                    <Label htmlFor="type">Project Type</Label>
-                    <Select value={projectDetails.type} onValueChange={handleSelectChange}>
+                    <Label htmlFor="type">Job Type</Label>
+                    <Select value={jobDetails.type} onValueChange={handleSelectChange}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select project type" />
+                            <SelectValue placeholder="Select job type" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Full-time">Full-time</SelectItem>
@@ -176,45 +176,45 @@ export default function AdminPage() {
               </div>
                <div className="space-y-2">
                     <Label htmlFor="salary">Stipend / Rate</Label>
-                    <Input id="salary" value={projectDetails.salary} onChange={handleInputChange} placeholder="e.g., $120,000 - $160,000" required />
+                    <Input id="salary" value={jobDetails.salary} onChange={handleInputChange} placeholder="e.g., $120,000 - $160,000" required />
                </div>
                <div className="space-y-2">
                     <Label htmlFor="skills">Skills (comma-separated)</Label>
-                    <Input id="skills" value={projectDetails.skills} onChange={handleInputChange} placeholder="e.g., React, TypeScript, Node.js" required />
+                    <Input id="skills" value={jobDetails.skills} onChange={handleInputChange} placeholder="e.g., React, TypeScript, Node.js" required />
                </div>
                <div className="space-y-2">
-                    <Label htmlFor="description">Project Description</Label>
-                    <Textarea id="description" value={projectDetails.description} onChange={handleInputChange} placeholder="Describe the role and responsibilities..." rows={5} required />
+                    <Label htmlFor="description">Job Description</Label>
+                    <Textarea id="description" value={jobDetails.description} onChange={handleInputChange} placeholder="Describe the role and responsibilities..." rows={5} required />
                </div>
                <div className="flex gap-2 justify-end">
                     <Button type="button" variant="ghost" onClick={resetForm}>Cancel</Button>
-                    <Button type="submit">{editingProject ? 'Update Project' : 'Post Project'}</Button>
+                    <Button type="submit">{editingJob ? 'Update Job' : 'Post Job'}</Button>
                </div>
             </form>
           ) : (
              <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">Your Project Postings ({postedProjects.length})</h3>
+                    <h3 className="text-lg font-semibold">Your Job Postings ({postedJobs.length})</h3>
                     <Button onClick={() => setShowForm(true)}>
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        Post a New Project
+                        Post a New Job
                     </Button>
                 </div>
-                {postedProjects.length > 0 ? (
+                {postedJobs.length > 0 ? (
                     <div className="space-y-4">
-                        {postedProjects.slice().reverse().map(project => (
-                            <Card key={project.id} className="p-4">
+                        {postedJobs.slice().reverse().map(job => (
+                            <Card key={job.id} className="p-4">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <h4 className="font-semibold">{project.title}</h4>
-                                        <p className="text-sm text-muted-foreground">{project.organization} - {project.location}</p>
+                                        <h4 className="font-semibold">{job.title}</h4>
+                                        <p className="text-sm text-muted-foreground">{job.organization} - {job.location}</p>
                                     </div>
-                                    <Badge variant={project.type === 'Full-time' ? 'default' : 'secondary'}>{project.type}</Badge>
+                                    <Badge variant={job.type === 'Full-time' ? 'default' : 'secondary'}>{job.type}</Badge>
                                 </div>
                                 <Separator className="my-3"/>
                                 <div className="flex justify-end gap-2">
-                                     <Button variant="outline" size="sm" onClick={() => handleEditProject(project)}><Edit className="mr-2 h-3 w-3"/> Edit</Button>
-                                     <Button variant="destructive" size="sm" onClick={() => handleDeleteProject(project.id)}><Trash2 className="mr-2 h-3 w-3"/> Delete</Button>
+                                     <Button variant="outline" size="sm" onClick={() => handleEditJob(job)}><Edit className="mr-2 h-3 w-3"/> Edit</Button>
+                                     <Button variant="destructive" size="sm" onClick={() => handleDeleteJob(job.id)}><Trash2 className="mr-2 h-3 w-3"/> Delete</Button>
                                 </div>
                             </Card>
                         ))}
@@ -222,8 +222,8 @@ export default function AdminPage() {
                 ) : (
                     <div className="text-center p-8 border-2 border-dashed rounded-lg">
                         <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">No Projects Posted Yet</h3>
-                        <p className="text-muted-foreground mb-4">Post a project to attract candidates.</p>
+                        <h3 className="text-lg font-semibold mb-2">No Jobs Posted Yet</h3>
+                        <p className="text-muted-foreground mb-4">Post a job to attract candidates.</p>
                     </div>
                 )}
             </div>
