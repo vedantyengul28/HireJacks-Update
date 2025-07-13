@@ -21,16 +21,17 @@ function ProfileCompletionCard() {
     const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
     useEffect(() => {
+        let isMounted = true;
         try {
             const storedProfile = localStorage.getItem('userProfile');
-            if (storedProfile) {
+            if (storedProfile && isMounted) {
                 const profile = JSON.parse(storedProfile);
                 let filledFields = 0;
-                if (profile.data.firstName) filledFields++;
-                if (profile.data.lastName) filledFields++;
-                if (profile.data.email) filledFields++;
-                if (profile.data.headline) filledFields++;
-                if (profile.data.summary) filledFields++;
+                if (profile.data?.firstName) filledFields++;
+                if (profile.data?.lastName) filledFields++;
+                if (profile.data?.email) filledFields++;
+                if (profile.data?.headline) filledFields++;
+                if (profile.data?.summary) filledFields++;
                 if (profile.resumeFile) filledFields++;
                 if (profile.profilePhoto) filledFields++;
 
@@ -45,6 +46,7 @@ function ProfileCompletionCard() {
         } catch (error) {
             console.error("Error accessing localStorage:", error);
         }
+        return () => { isMounted = false; };
     }, []);
 
     return (
@@ -82,10 +84,13 @@ function ProfileCompletionCard() {
                             <p className="text-xs text-muted-foreground">
                                 {lastUpdated ? `Updated ${lastUpdated}` : 'Not updated yet'}
                             </p>
-                             {missingDetails > 0 && (
-                                <Link href="/student/profile" className="text-sm text-primary font-medium">
+                             {missingDetails > 0 && completion < 100 && (
+                                <Link href="/student/profile" className="text-sm text-primary font-medium hover:underline">
                                     {missingDetails} missing detail{missingDetails > 1 ? 's' : ''}
                                 </Link>
+                             )}
+                             {completion === 100 && (
+                                <p className="text-sm font-medium text-green-500">Profile complete!</p>
                              )}
                         </div>
                     </div>
@@ -98,22 +103,24 @@ function ProfileCompletionCard() {
                 <Separator className="my-4"/>
                 <div className='flex justify-between items-center'>
                      <div>
-                        <p className="flex items-center gap-1 text-sm font-semibold text-green-600">
+                        <p className="flex items-center gap-1 text-sm font-semibold text-green-500">
                             <ArrowUp className="h-4 w-4"/>
-                            Boost 2%
+                            Boost your visibility
                         </p>
-                        <p className="text-xs text-muted-foreground">Personal details help admins know more about you.</p>
+                        <p className="text-xs text-muted-foreground">Complete your profile to get seen by recruiters.</p>
                      </div>
-                     <Link href="/student/profile">
-                        <Button variant="outline" size="sm">Add Details</Button>
-                     </Link>
+                     {completion < 100 && (
+                        <Link href="/student/profile">
+                            <Button variant="outline" size="sm">Add Details</Button>
+                        </Link>
+                     )}
                 </div>
             </CardContent>
         </Card>
     );
 }
 
-function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; }) {
+function JobCard({ job, onSave, onApply, isApplied, isSaved }: { job: Job; onSave: (job: Job) => void; onApply: (jobId: number) => void; isApplied: boolean; isSaved: boolean; }) {
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
@@ -138,7 +145,7 @@ function JobCard({ job, onSave, onApply, isApplied }: { job: Job; onSave: (job: 
              <p className="text-sm font-semibold">{job.salary}</p>
              <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => onSave(job)}>
-                    <Bookmark className="h-4 w-4" />
+                    <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
                     <span className="sr-only">Save Job</span>
                 </Button>
                 {isApplied ? (
@@ -161,33 +168,47 @@ function AiJobFeed() {
   const [state, formAction] = useActionState(handleSuggestJobs, { message: '', jobs: [] });
   const [submitted, setSubmitted] = useState(false);
   const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
+  const [savedJobs, setSavedJobs] = useState<number[]>([]);
   const [allJobs, setAllJobs] = useState<Job[]>([]);
   const { toast } = useToast();
-
-  const profileSummary = "Experienced frontend developer proficient in React, TypeScript, and Next.js. Passionate about building accessible user interfaces and working with modern web technologies. Skilled in state management with Redux and Zustand, and building design systems with Tailwind CSS.";
+  const [profileSummary, setProfileSummary] = useState('');
 
   useEffect(() => {
-    try {
-        const storedJobs = localStorage.getItem('allJobs');
-        const jobs = storedJobs ? JSON.parse(storedJobs) : sampleJobs;
-        setAllJobs(jobs);
+    let isMounted = true;
+    const loadData = () => {
+        try {
+            const storedJobs = localStorage.getItem('allJobs');
+            const jobs = storedJobs ? JSON.parse(storedJobs) : sampleJobs;
+            
+            const storedAppliedJobs = localStorage.getItem('appliedJobs');
+            const applied = storedAppliedJobs ? JSON.parse(storedAppliedJobs) : [];
+            
+            const storedSavedJobs = localStorage.getItem('savedJobs');
+            const saved = storedSavedJobs ? JSON.parse(storedSavedJobs).map((j: Job) => j.id) : [];
 
-        if (!storedJobs) {
-            localStorage.setItem('allJobs', JSON.stringify(sampleJobs));
+            const userProfileData = localStorage.getItem('userProfile');
+            const profile = userProfileData ? JSON.parse(userProfileData) : {};
+            const summary = profile.data?.summary || "No profile summary found. Please update your profile.";
+            
+            if (isMounted) {
+                setAllJobs(jobs);
+                if (!storedJobs) localStorage.setItem('allJobs', JSON.stringify(sampleJobs));
+                setAppliedJobs(applied);
+                setSavedJobs(saved);
+                setProfileSummary(summary);
+            }
+        } catch (error) {
+            console.error("Error accessing localStorage:", error);
+            if (isMounted) setAllJobs(sampleJobs);
         }
+    };
 
-        const storedAppliedJobs = localStorage.getItem('appliedJobs');
-        if(storedAppliedJobs) {
-            setAppliedJobs(JSON.parse(storedAppliedJobs));
-        }
-    } catch (error) {
-        console.error("Error accessing localStorage:", error);
-        setAllJobs(sampleJobs);
-    }
+    loadData();
+    return () => { isMounted = false; };
   }, []);
 
   useEffect(() => {
-    if (!submitted) {
+    if (!submitted && profileSummary) {
         const formData = new FormData();
         formData.append('profile', profileSummary);
         startTransition(() => {
@@ -198,20 +219,46 @@ function AiJobFeed() {
   }, [submitted, formAction, profileSummary]);
 
   const handleSaveJob = (jobToSave: Job) => {
-    const savedJobs: Job[] = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-    const isAlreadySaved = savedJobs.some(job => job.id === jobToSave.id);
-    if (!isAlreadySaved) {
-        localStorage.setItem('savedJobs', JSON.stringify([...savedJobs, jobToSave]));
-        toast({
-            title: "Job Saved!",
-            description: `${jobToSave.title} at ${jobToSave.organization} has been saved.`
-        });
+    let currentSavedJobs: Job[] = [];
+    try {
+      currentSavedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    } catch (e) { console.error(e) }
+    
+    const isAlreadySaved = currentSavedJobs.some(job => job.id === jobToSave.id);
+    let updatedSavedJobs;
+
+    if (isAlreadySaved) {
+      updatedSavedJobs = currentSavedJobs.filter(job => job.id !== jobToSave.id);
+      toast({
+        variant: "destructive",
+        title: "Job Unsaved",
+        description: `${jobToSave.title} at ${jobToSave.organization} has been removed.`
+      });
     } else {
-        toast({
-            variant: "default",
-            title: "Already Saved",
-            description: `This job is already in your saved list.`
-        });
+      updatedSavedJobs = [...currentSavedJobs, jobToSave];
+      toast({
+        title: "Job Saved!",
+        description: `${jobToSave.title} at ${jobToSave.organization} has been saved.`
+      });
+    }
+    
+    localStorage.setItem('savedJobs', JSON.stringify(updatedSavedJobs));
+    setSavedJobs(updatedSavedJobs.map(p => p.id));
+  };
+  
+   const addNotification = (newNotification: {title: string; description: string;}) => {
+    try {
+        const existingNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const notification = {
+            ...newNotification,
+            id: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
+            read: false,
+        };
+        const updatedNotifications = [...existingNotifications, notification];
+        localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+    } catch (error) {
+        console.error("Failed to add notification:", error);
     }
   };
 
@@ -223,8 +270,7 @@ function AiJobFeed() {
     const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
     const applications = JSON.parse(localStorage.getItem('applications') || '[]');
     
-    // Ensure we don't add duplicate applications
-    const hasAlreadyApplied = applications.some((app: any) => app.jobId === jobId && app.applicantProfile.data.email === userProfile.data.email);
+    const hasAlreadyApplied = applications.some((app: any) => app.jobId === jobId && app.applicantProfile?.data?.email === userProfile?.data?.email);
 
     if (!hasAlreadyApplied) {
       applications.push({ jobId, applicantProfile: userProfile });
@@ -235,14 +281,21 @@ function AiJobFeed() {
     if (job) {
         toast({
             title: "Application Sent!",
-            description: `You successfully applied for the ${job.title} position at ${job.organization}.`
+            description: `You successfully applied for the ${job.title} position.`
+        });
+        addNotification({
+            title: "Application Sent!",
+            description: `You applied for ${job.title} at ${job.organization}.`
         });
     }
   };
   
   const pending = isPending || (submitted && !state.jobs?.length && !state.message.startsWith('No'));
   const jobsToDisplay = allJobs.slice().reverse();
-  const suggestedJobs = jobsToDisplay.filter(job => state.jobs?.some(suggestion => job.title.toLowerCase().includes(suggestion.toLowerCase().split(' ').slice(0, 2).join(' ') || '')));
+  const suggestedJobs = state.jobs && state.jobs.length > 0
+    ? jobsToDisplay.filter(job => state.jobs?.some(suggestion => 
+        job.title.toLowerCase().includes(suggestion.toLowerCase().split(' ').slice(0, 2).join(' ') || '')))
+    : [];
 
 
   return (
@@ -264,7 +317,7 @@ function AiJobFeed() {
       {!pending && suggestedJobs.length > 0 && (
         <div className="space-y-4">
           {suggestedJobs.map(job => (
-            <JobCard key={job.id} job={job} onSave={handleSaveJob} onApply={handleApply} isApplied={appliedJobs.includes(job.id)} />
+            <JobCard key={job.id} job={job} onSave={handleSaveJob} onApply={handleApply} isApplied={appliedJobs.includes(job.id)} isSaved={savedJobs.includes(job.id)} />
           ))}
         </div>
       )}
