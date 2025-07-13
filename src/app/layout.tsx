@@ -5,7 +5,7 @@ import ServiceWorkerRegistrar from '@/components/service-worker-registrar';
 
 export const metadata: Metadata = {
   title: 'HireJacks',
-  description: 'The best app for finding jobs and recruiting talent.',
+  description: 'The best app for finding projects and recruiting talent.',
 };
 
 export default function RootLayout({
