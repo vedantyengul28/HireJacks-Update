@@ -26,6 +26,7 @@ export default function AdminAuthPage() {
   const [loginPassword, setLoginPassword] = useState('');
 
   const [signupOrganization, setSignupOrganization] = useState('');
+  const [signupName, setSignupName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
 
@@ -45,8 +46,14 @@ export default function AdminAuthPage() {
         const admin = admins.find((r: any) => r.email === loginEmail && r.password === loginPassword);
 
         if (admin) {
-             // You can also store admin-specific info if needed
-            localStorage.setItem('adminProfile', JSON.stringify({ organization: admin.organization, email: admin.email }));
+            localStorage.setItem('adminProfile', JSON.stringify({ 
+              data: {
+                name: admin.name,
+                organization: admin.organization, 
+                email: admin.email 
+              },
+              timestamp: new Date().toISOString()
+            }));
             router.push('/admin');
         } else {
              toast({
@@ -67,7 +74,7 @@ export default function AdminAuthPage() {
 
   const handleSignup = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (!signupOrganization || !signupEmail || !signupPassword) {
+    if (!signupOrganization || !signupName || !signupEmail || !signupPassword) {
       toast({
         variant: "destructive",
         title: "Signup Failed",
@@ -89,11 +96,18 @@ export default function AdminAuthPage() {
             return;
         }
 
-        const newAdmin = { organization: signupOrganization, email: signupEmail, password: signupPassword };
+        const newAdmin = { name: signupName, organization: signupOrganization, email: signupEmail, password: signupPassword };
         admins.push(newAdmin);
         localStorage.setItem('adminUsers', JSON.stringify(admins));
         
-        localStorage.setItem('adminProfile', JSON.stringify({ organization: newAdmin.organization, email: newAdmin.email }));
+        localStorage.setItem('adminProfile', JSON.stringify({
+          data: {
+            name: newAdmin.name,
+            organization: newAdmin.organization, 
+            email: newAdmin.email
+          },
+          timestamp: new Date().toISOString()
+        }));
 
         toast({
             title: "Account Created!",
@@ -152,6 +166,10 @@ export default function AdminAuthPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+               <div className="space-y-2">
+                <Label htmlFor="signup-name">Full Name</Label>
+                <Input id="signup-name" type="text" placeholder="John Doe" required value={signupName} onChange={(e) => setSignupName(e.target.value)} />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="name">Organization Name</Label>
                 <Input id="name" type="text" placeholder="Your Organization Inc." required value={signupOrganization} onChange={(e) => setSignupOrganization(e.target.value)} />

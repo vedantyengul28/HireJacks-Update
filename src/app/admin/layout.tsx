@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { PlusSquare, Users, BarChart3, Briefcase, LogIn } from 'lucide-react';
+import { PlusSquare, Users, BarChart3, Briefcase, LogIn, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -18,6 +18,7 @@ export default function AdminLayout({
     { href: '/admin', icon: PlusSquare, label: 'Post Job' },
     { href: '/admin/applicants', icon: Users, label: 'Applicants' },
     { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+    { href: '/admin/profile', icon: User, label: 'Profile' },
   ];
 
   if (pathname.includes('/login')) {
