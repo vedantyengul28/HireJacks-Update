@@ -161,20 +161,19 @@ function AiJobFeed() {
   const [state, formAction] = useActionState(handleSuggestJobs, { message: '', jobs: [] });
   const [submitted, setSubmitted] = useState(false);
   const [appliedJobs, setAppliedJobs] = useState<number[]>([]);
-  const { toast } = useToast();
   const [allJobs, setAllJobs] = useState<Job[]>([]);
+  const { toast } = useToast();
 
   const profileSummary = "Experienced frontend developer proficient in React, TypeScript, and Next.js. Passionate about building accessible user interfaces and working with modern web technologies. Skilled in state management with Redux and Zustand, and building design systems with Tailwind CSS.";
 
   useEffect(() => {
     try {
         const storedJobs = localStorage.getItem('allJobs');
-        if (storedJobs) {
-            setAllJobs(JSON.parse(storedJobs));
-        } else {
-            const initialJobs = sampleJobs;
-            setAllJobs(initialJobs);
-            localStorage.setItem('allJobs', JSON.stringify(initialJobs));
+        const jobs = storedJobs ? JSON.parse(storedJobs) : sampleJobs;
+        setAllJobs(jobs);
+
+        if (!storedJobs) {
+            localStorage.setItem('allJobs', JSON.stringify(sampleJobs));
         }
 
         const storedAppliedJobs = localStorage.getItem('appliedJobs');

@@ -66,6 +66,10 @@ export default function ApplyJobsPage() {
       const jobs = storedJobs ? JSON.parse(storedJobs) : sampleJobs;
       setAllJobs(jobs.slice().reverse());
 
+      if (!storedJobs) {
+        localStorage.setItem('allJobs', JSON.stringify(sampleJobs));
+      }
+
       const storedAppliedJobs = localStorage.getItem('appliedJobs');
       if (storedAppliedJobs) {
         setAppliedJobs(JSON.parse(storedAppliedJobs));

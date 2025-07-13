@@ -74,6 +74,10 @@ export default function JobSearchPage() {
         setAllJobs(jobs);
         setFilteredJobs(jobs.slice().reverse()); // Show newest first
         
+        if (!storedJobs) {
+            localStorage.setItem('allJobs', JSON.stringify(sampleJobs));
+        }
+
         const storedAppliedJobs = localStorage.getItem('appliedJobs');
         if (storedAppliedJobs) {
           setAppliedJobs(JSON.parse(storedAppliedJobs));
