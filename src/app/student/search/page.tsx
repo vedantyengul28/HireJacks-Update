@@ -184,15 +184,13 @@ export default function AiJobSearchPage() {
     e.preventDefault();
     const formData = new FormData();
     formData.append('profile', profileSummary);
+    formData.append('allJobs', JSON.stringify(allJobs));
     startTransition(() => {
         formAction(formData);
     });
   }
 
-  const suggestedJobs = state.jobs && state.jobs.length > 0
-    ? allJobs.filter(job => state.jobs?.some(suggestion => 
-        job.title.toLowerCase().includes(suggestion.toLowerCase().split(' ').slice(0, 2).join(' '))))
-    : [];
+  const suggestedJobs = state.jobs || [];
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -275,3 +273,5 @@ declare module '../notifications/page' {
         forAdmin?: boolean;
     }
 }
+
+    
